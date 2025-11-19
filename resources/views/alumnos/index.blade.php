@@ -10,7 +10,7 @@
             <button class="btn btn-outline-secondary d-none" type="button" id="btn-reset" title="Borrar filtros">&times;</button>
         </div>
 
-        <select id="filtro-liga" class="form-select me-2">
+        <select id="filtro-liga" class="form-select me-2 w-auto">
             <option value="">Todas las ligas</option>
             <option value="local" {{ request('liga') == 'local' ? 'selected' : '' }}>Local</option>
             <option value="infantil" {{ request('liga') == 'infantil' ? 'selected' : '' }}>Infantil</option>

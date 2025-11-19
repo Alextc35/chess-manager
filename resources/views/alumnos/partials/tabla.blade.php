@@ -13,7 +13,7 @@
         <tr>
             <td>{{ $alumno->nombre }}</td>
             <td>{{ $alumno->apellidos }}</td>
-            <td>{{ $alumno->fecha_nacimiento }}</td>
+            <td>{{ \Carbon\Carbon::parse($alumno->fecha_nacimiento)->format('d/m/Y') }}</td>
             <td>{{ $alumno->liga }}</td>
             <td>
                 <a href="{{ route('alumnos.edit', $alumno) }}" class="btn btn-warning btn-sm">Editar</a>
