@@ -33,5 +33,5 @@
 </table>
 
 <div class="mt-3">
-    {{ $alumnos->links() }}
+    {{ $alumnos->links('pagination::bootstrap-5') }}
 </div>
