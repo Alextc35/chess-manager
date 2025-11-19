@@ -14,14 +14,21 @@ class AlumnoController extends Controller
     {
         $query = Alumno::query();
 
-        // Si hay búsqueda, filtramos por nombre o apellidos
+        // Agrupar la búsqueda por nombre o apellidos
         if ($request->has('q') && $request->q != '') {
             $search = $request->q;
-            $query->where('nombre', 'like', "%{$search}%")
+            $query->where(function($q) use ($search) {
+                $q->where('nombre', 'like', "%{$search}%")
                 ->orWhere('apellidos', 'like', "%{$search}%");
+            });
         }
 
-        $alumnos = $query->orderBy('nombre')->paginate(5)->withQueryString();;
+        // Filtro por liga
+        if ($request->has('liga') && in_array($request->liga, ['local', 'infantil'])) {
+            $query->where('liga', $request->liga);
+        }
+
+        $alumnos = $query->orderBy('nombre')->paginate(5)->withQueryString();
 
         if ($request->ajax()) {
             return view('alumnos.partials.tabla', compact('alumnos'))->render();
