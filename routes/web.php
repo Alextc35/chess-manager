@@ -19,12 +19,13 @@ Route::get('temporadas/{temporada}/alumnos', [TemporadaAlumnoController::class, 
     ->name('temporadas.alumnos.edit');
 Route::post('temporadas/{temporada}/alumnos', [TemporadaAlumnoController::class, 'update'])
     ->name('temporadas.alumnos.update');
+
 Route::get('temporadas/{temporada}/enfrentamientos', [TemporadaController::class, 'enfrentamientos'])
     ->name('temporadas.enfrentamientos');
 Route::delete('temporadas/{temporada}/enfrentamientos/{enfrentamiento}', [EnfrentamientoController::class, 'destroy'])
     ->name('enfrentamientos.destroy');
 Route::get('temporadas/{temporada}/clasificacion', [TemporadaController::class, 'clasificacion'])
     ->name('temporadas.clasificacion');
+    
 Route::get('ranking', [ClasificacionController::class, 'ranking'])->name('clasificacions.ranking');
 Route::post('ranking', [ClasificacionController::class, 'rankingPost'])->name('clasificacions.ranking.post');
-Route::get('alumnos/buscar', [AlumnoController::class, 'buscar'])->name('alumnos.buscar');

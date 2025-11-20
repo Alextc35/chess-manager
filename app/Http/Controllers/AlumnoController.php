@@ -107,19 +107,4 @@ class AlumnoController extends Controller
         return redirect()->route('alumnos.index')
                          ->with('success', 'Alumno eliminado correctamente.');
     }
-
-    public function buscar(Request $request)
-    {
-        $q = $request->get('q', '');
-
-        $alumnos = Alumno::query()
-            ->when($q, function($query, $q) {
-                $query->where('nombre', 'like', "%{$q}%")
-                    ->orWhere('apellidos', 'like', "%{$q}%");
-            })
-            ->orderBy('nombre')
-            ->get();
-
-        return view('alumnos.partials.tabla', compact('alumnos'))->render();
-    }
 }
