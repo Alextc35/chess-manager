@@ -32,10 +32,13 @@ class TemporadaController extends Controller
         $request->validate([
             'nombre' => 'required|string|max:255',
             'fecha_inicio' => 'required|date',
-            'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
         ]);
 
-        Temporada::create($request->all());
+        Temporada::create([
+            'nombre' => $request->nombre,
+            'fecha_inicio' => $request->fecha_inicio,
+            'fecha_fin' => null, // siempre null al crear
+        ]);
 
         return redirect()->route('temporadas.index')
                          ->with('success', 'Temporada creada correctamente.');
@@ -105,5 +108,15 @@ class TemporadaController extends Controller
             ->keyBy('id');
 
         return view('temporadas.clasificacion', compact('temporada', 'clasificacion', 'alumnos'));
+    }
+
+    public function finalizar(Temporada $temporada)
+    {
+        $temporada->update([
+            'fecha_fin' => now(),
+        ]);
+
+        return redirect()->route('temporadas.index')
+            ->with('success', 'La temporada ha sido finalizada.');
     }
 }

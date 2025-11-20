@@ -9,7 +9,12 @@ class Temporada extends Model
     protected $fillable = [
         'nombre',
         'fecha_inicio',
-        'fecha_fin',
+        'fecha_fin'
+    ];
+
+    protected $dates = [
+        'fecha_inicio',
+        'fecha_fin'
     ];
 
     public function alumnos()

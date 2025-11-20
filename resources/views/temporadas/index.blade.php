@@ -6,16 +6,13 @@
 
     <a href="{{ route('temporadas.create') }}" class="btn btn-primary mb-3">Nueva Temporada</a>
 
-    @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
-
     <table class="table table-bordered">
         <thead>
             <tr>
                 <th>Nombre</th>
                 <th>Fecha Inicio</th>
                 <th>Fecha Fin</th>
+                <th>Estado</th>
                 <th>Acciones</th>
             </tr>
         </thead>
@@ -23,14 +20,28 @@
             @foreach($temporadas as $temporada)
             <tr>
                 <td>{{ $temporada->nombre }}</td>
-                <td>{{ $temporada->fecha_inicio }}</td>
-                <td>{{ $temporada->fecha_fin }}</td>
+                <td>{{ \Carbon\Carbon::parse($temporada->fecha_inicio)->format('d/m/Y') }}</td>
+
+                {{-- Fecha fin o EN CURSO --}}
+                <td>
+                    @if($temporada->fecha_fin)
+                        {{ \Carbon\Carbon::parse($temporada->fecha_fin)->format('d/m/Y') }}
+                    @else
+                        —
+                    @endif
+                </td>
+
+                {{-- Estado --}}
+                <td>
+                    @if($temporada->fecha_fin)
+                        <span class="badge bg-secondary">Finalizada</span>
+                    @else
+                        <span class="badge bg-success">EN CURSO</span>
+                    @endif
+                </td>
+
                 <td>
                     <a href="{{ route('temporadas.show', $temporada) }}" class="btn btn-info btn-sm">Ver</a>
-
-                    <a href="{{ route('temporadas.alumnos.edit', $temporada) }}" class="btn btn-success btn-sm">
-                        Alumnos
-                    </a>
 
                     <a href="{{ route('temporadas.edit', $temporada) }}" class="btn btn-warning btn-sm">Editar</a>
 
@@ -47,7 +58,24 @@
                         </button>
                     </form>
 
+                    {{-- Botón FINALIZAR TEMPORADA si aún no tiene fecha_fin --}}
+                    @if(!$temporada->fecha_fin)
+                        <form action="{{ route('temporadas.finalizar', $temporada) }}" 
+                              method="POST" 
+                              style="display:inline-block;">
+                            @csrf
+                            @method('PATCH')
+
+                            <button type="submit" 
+                                    class="btn btn-success btn-sm"
+                                    onclick="return confirm('¿Finalizar esta temporada?')">
+                                Finalizar
+                            </button>
+                        </form>
+                    @endif
+
                 </td>
+            </tr>
             @endforeach
         </tbody>
     </table>

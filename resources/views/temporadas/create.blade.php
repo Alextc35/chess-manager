@@ -7,22 +7,29 @@
     <form action="{{ route('temporadas.store') }}" method="POST">
         @csrf
 
+        {{-- Nombre --}}
         <div class="mb-3">
             <label class="form-label">Nombre</label>
-            <input type="text" name="nombre" class="form-control" required>
+            <input type="text"
+                   name="nombre"
+                   class="form-control"
+                   value="{{ old('nombre') }}"
+                   required>
         </div>
 
+        {{-- Fecha Inicio --}}
         <div class="mb-3">
-            <label class="form-label">Fecha Inicio</label>
-            <input type="date" name="fecha_inicio" class="form-control" required>
+            <label class="form-label">Fecha de Inicio</label>
+            <input type="date"
+                   name="fecha_inicio"
+                   class="form-control"
+                   value="{{ old('fecha_inicio') }}"
+                   required>
         </div>
 
-        <div class="mb-3">
-            <label class="form-label">Fecha Fin</label>
-            <input type="date" name="fecha_fin" class="form-control" required>
-        </div>
-
-        <button class="btn btn-primary">Guardar</button>
+        {{-- Fecha fin eliminada, se añadirá al finalizar temporada --}}
+        
+        <button type="submit" class="btn btn-primary">Crear Temporada</button>
         <a href="{{ route('temporadas.index') }}" class="btn btn-secondary">Cancelar</a>
     </form>
 </div>
