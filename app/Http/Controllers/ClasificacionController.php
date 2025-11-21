@@ -13,24 +13,23 @@ class ClasificacionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $temporadas = Temporada::orderBy('fecha_inicio', 'desc')->get();
         $temporada = $temporadas->first();
 
-        $rankingLocal = null;
-        $rankingInfantil = null;
+        $liga = $request->input('liga', 'local'); // liga por defecto
 
+        $ranking = null;
         if ($temporada) {
-            $rankingLocal = $this->calcularRankingLiga($temporada, 'local');
-            $rankingInfantil = $this->calcularRankingLiga($temporada, 'infantil');
+            $ranking = $this->calcularRankingLiga($temporada, $liga);
         }
 
         return view('clasificacions.index', compact(
             'temporadas',
             'temporada',
-            'rankingLocal',
-            'rankingInfantil'
+            'liga',
+            'ranking'
         ));
     }
 
@@ -113,19 +112,20 @@ class ClasificacionController extends Controller
     {
         $request->validate([
             'temporada_id' => 'required|exists:temporadas,id',
+            'liga' => 'required|in:local,infantil',
         ]);
 
         $temporadas = Temporada::orderBy('fecha_inicio', 'desc')->get();
         $temporada = Temporada::find($request->temporada_id);
+        $liga = $request->input('liga');
 
-        $rankingLocal = $this->calcularRankingLiga($temporada, 'local');
-        $rankingInfantil = $this->calcularRankingLiga($temporada, 'infantil');
+        $ranking = $this->calcularRankingLiga($temporada, $liga);
 
         return view('clasificacions.index', compact(
             'temporadas',
             'temporada',
-            'rankingLocal',
-            'rankingInfantil'
+            'liga',
+            'ranking'
         ));
     }
 
