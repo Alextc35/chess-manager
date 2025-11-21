@@ -13,7 +13,7 @@
                 <option value="" disabled>Seleccione temporada…</option>
                 @foreach($temporadas as $temp)
                     <option value="{{ $temp->id }}" @selected($temporada && $temporada->id == $temp->id)>
-                        {{ $temp->nombre }} ({{ \Carbon\Carbon::parse($temp->fecha_inicio)->format('d/m/Y') }})
+                        {{ $temp->nombre }}
                     </option>
                 @endforeach
             </select>
