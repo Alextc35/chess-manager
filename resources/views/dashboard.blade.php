@@ -24,15 +24,6 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card text-white bg-warning">
-                <div class="card-body">
-                    <h5 class="card-title">Clasificaciones</h5>
-                    <p class="card-text fs-3">{{ $totalClasificaciones }}</p>
-                    <a href="{{ route('clasificacions.index') }}" class="btn btn-light btn-sm">Ver clasificaciones</a>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
             <div class="card text-white bg-danger">
                 <div class="card-body">
                     <h5 class="card-title">Enfrentamientos</h5>
