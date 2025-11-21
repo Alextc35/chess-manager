@@ -6,10 +6,6 @@
 
     <a href="{{ route('enfrentamientos.create') }}" class="btn btn-primary mb-3">Nuevo Enfrentamiento</a>
 
-    @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
-
     <table class="table table-bordered">
         <thead>
             <tr>

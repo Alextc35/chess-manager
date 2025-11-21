@@ -26,9 +26,9 @@ class EnfrentamientoController extends Controller
     public function create()
     {
         $alumnos = Alumno::orderBy('nombre')->get();
-        $temporada = Temporada::orderBy('fecha_inicio', 'desc')->first(); // última temporada
+        $temporada = Temporada::orderBy('fecha_inicio', 'desc')->first();
 
-        return view('enfrentamientos.create', compact('alumnos', 'temporada'));
+        return view('enfrentamientos.multiple', compact('alumnos', 'temporada'));
     }
 
     /**
@@ -113,5 +113,70 @@ class EnfrentamientoController extends Controller
         return redirect()
             ->route('temporadas.enfrentamientos', $temporada)
             ->with('success', 'Enfrentamiento eliminado correctamente.');
+    }
+
+    public function generar(Request $request)
+    {
+        $request->validate([
+            'alumnos' => 'required|array|min:2',
+        ]);
+
+        $ids = $request->alumnos;
+
+        // Mezcla aleatoria
+        shuffle($ids);
+
+        $combinaciones = [];
+        $count = count($ids);
+
+        // Si es impar, el último queda libre
+        $bye = null;
+        if ($count % 2 !== 0) {
+            $bye = array_pop($ids);
+            $count--;
+        }
+
+        // Generar parejas 1 vs 2, 3 vs 4, etc.
+        for ($i = 0; $i < $count; $i += 2) {
+            $combinaciones[] = [
+                'alumno1_id' => $ids[$i],
+                'alumno2_id' => $ids[$i + 1],
+            ];
+        }
+
+        $alumnos = Alumno::whereIn('id', $request->alumnos)->get();
+
+        return view('enfrentamientos.resultados', [
+            'combinaciones' => $combinaciones,
+            'bye' => $bye,
+            'alumnos' => $alumnos,
+            'temporada' => Temporada::orderBy('fecha_inicio', 'desc')->first(),
+        ]);
+    }
+
+    public function storeMultiple(Request $request)
+    {
+        $resultados = $request->resultados;
+        $temporada = Temporada::orderBy('fecha_inicio', 'desc')->first();
+
+        foreach ($resultados as $res) {
+
+            $enf = Enfrentamiento::create([
+                'temporada_id' => $temporada->id,
+                'alumno1_id' => $res['alumno1_id'],
+                'alumno2_id' => $res['alumno2_id'],
+                'resultado'  => $res['resultado'] ?? null,
+                'fecha' => now(),
+            ]);
+
+            // asociar alumnos a temporada
+            $temporada->alumnos()->syncWithoutDetaching([
+                $res['alumno1_id'], 
+                $res['alumno2_id']
+            ]);
+        }
+
+        return redirect()->route('enfrentamientos.index')
+            ->with('success', 'Sesión creada con todos los enfrentamientos.');
     }
 }

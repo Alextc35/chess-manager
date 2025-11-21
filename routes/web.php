@@ -33,3 +33,9 @@ Route::patch('/temporadas/{temporada}/finalizar', [TemporadaController::class, '
 
 Route::get('ranking', [ClasificacionController::class, 'ranking'])->name('clasificacions.ranking');
 Route::post('ranking', [ClasificacionController::class, 'rankingPost'])->name('clasificacions.ranking.post');
+
+Route::post('/enfrentamientos/generar', [EnfrentamientoController::class, 'generar'])
+     ->name('enfrentamientos.generar');
+
+Route::post('/enfrentamientos/store-multiple', [EnfrentamientoController::class, 'storeMultiple'])
+    ->name('enfrentamientos.storeMultiple');
