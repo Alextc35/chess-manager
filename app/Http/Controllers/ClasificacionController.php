@@ -15,15 +15,23 @@ class ClasificacionController extends Controller
      */
     public function index()
     {
-        $temporadas = Temporada::orderBy('fecha_inicio')->get();
-        $temporada = $temporadas->last();
+        $temporadas = Temporada::orderBy('fecha_inicio', 'desc')->get();
+        $temporada = $temporadas->first();
 
-        $ranking = null;
+        $rankingLocal = null;
+        $rankingInfantil = null;
+
         if ($temporada) {
-            $ranking = $this->calcularRanking($temporada);
+            $rankingLocal = $this->calcularRankingLiga($temporada, 'local');
+            $rankingInfantil = $this->calcularRankingLiga($temporada, 'infantil');
         }
 
-        return view('clasificacions.index', compact('temporadas', 'temporada', 'ranking'));
+        return view('clasificacions.index', compact(
+            'temporadas',
+            'temporada',
+            'rankingLocal',
+            'rankingInfantil'
+        ));
     }
 
     /**
@@ -107,17 +115,23 @@ class ClasificacionController extends Controller
             'temporada_id' => 'required|exists:temporadas,id',
         ]);
 
-        $temporadas = Temporada::orderBy('fecha_inicio')->get();
+        $temporadas = Temporada::orderBy('fecha_inicio', 'desc')->get();
         $temporada = Temporada::find($request->temporada_id);
 
-        $ranking = $this->calcularRanking($temporada);
+        $rankingLocal = $this->calcularRankingLiga($temporada, 'local');
+        $rankingInfantil = $this->calcularRankingLiga($temporada, 'infantil');
 
-        return view('clasificacions.index', compact('temporadas', 'temporada', 'ranking'));
+        return view('clasificacions.index', compact(
+            'temporadas',
+            'temporada',
+            'rankingLocal',
+            'rankingInfantil'
+        ));
     }
 
-    private function calcularRanking($temporada)
+    private function calcularRankingLiga($temporada, $liga)
     {
-        $alumnos = $temporada->alumnos;
+        $alumnos = $temporada->alumnos->where('liga', $liga);
         $ranking = [];
 
         foreach ($alumnos as $alumno) {

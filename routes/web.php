@@ -32,7 +32,7 @@ Route::patch('/temporadas/{temporada}/finalizar', [TemporadaController::class, '
     ->name('temporadas.finalizar');
 
 Route::get('ranking', [ClasificacionController::class, 'ranking'])->name('clasificacions.ranking');
-Route::post('ranking', [ClasificacionController::class, 'rankingPost'])->name('clasificacions.ranking.post');
+Route::post('ranking', [ClasificacionController::class, 'rankingPost'])->name('clasificacions.rankingPost');
 
 Route::post('/enfrentamientos/generar', [EnfrentamientoController::class, 'generar'])
      ->name('enfrentamientos.generar');
