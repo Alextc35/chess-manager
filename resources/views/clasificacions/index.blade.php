@@ -11,9 +11,11 @@
         <div class="col-md-6">
             <label class="form-label fw-bold">Seleccionar Temporada</label>
             <select name="temporada_id" class="form-select" onchange="this.form.submit()">
+                <option value="" disabled>Seleccione temporada…</option>
+
                 @foreach($temporadas as $temp)
-                    <option value="{{ $temp->id }}" 
-                            @selected($temporada && $temporada->id == $temp->id)">
+                    <option value="{{ $temp->id }}"
+                        {{ $temporada && $temporada->id == $temp->id ? 'selected' : '' }}>
                         {{ $temp->nombre }} 
                         ({{ \Carbon\Carbon::parse($temp->fecha_inicio)->format('d/m/Y') }})
                     </option>
