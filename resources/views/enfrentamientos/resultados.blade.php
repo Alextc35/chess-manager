@@ -14,44 +14,52 @@
         @endforeach
     @endif
 
-    <form action="{{ route('enfrentamientos.storeMultiple') }}" method="POST">
-        @csrf
-        <input type="hidden" name="temporada_id" value="{{ $temporada->id }}">
+    @if(isset($combinaciones) && count($combinaciones) > 0)
+        <form action="{{ route('enfrentamientos.storeMultiple') }}" method="POST">
+            @csrf
+            <input type="hidden" name="temporada_id" value="{{ $temporada->id }}">
 
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Blancas</th>
-                    <th>Negras</th>
-                    <th>Resultado</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($combinaciones as $i => $comb)
-                    @php
-                        $a1 = $alumnos->firstWhere('id', $comb['alumno1_id']);
-                        $a2 = $alumnos->firstWhere('id', $comb['alumno2_id']);
-                    @endphp
+            <table class="table table-bordered">
+                <thead>
                     <tr>
-                        <td>{{ $a1->nombre }} {{ $a1->apellidos }}</td>
-                        <td>{{ $a2->nombre }} {{ $a2->apellidos }}</td>
-                        <td>
-                            <select name="resultados[{{ $i }}][resultado]" class="form-control">
-                                <option value="">—</option>
-                                <option value="blancas">Ganan blancas</option>
-                                <option value="negras">Ganan negras</option>
-                                <option value="tablas">Tablas</option>
-                            </select>
-
-                            <input type="hidden" name="resultados[{{ $i }}][alumno1_id]" value="{{ $comb['alumno1_id'] }}">
-                            <input type="hidden" name="resultados[{{ $i }}][alumno2_id]" value="{{ $comb['alumno2_id'] }}">
-                        </td>
+                        <th>Blancas</th>
+                        <th>Negras</th>
+                        <th>Resultado</th>
                     </tr>
-                @endforeach
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach($combinaciones as $i => $comb)
+                        @php
+                            $a1 = $alumnos->firstWhere('id', $comb['alumno1_id']);
+                            $a2 = $alumnos->firstWhere('id', $comb['alumno2_id']);
+                        @endphp
+                        <tr>
+                            <td>{{ $a1->nombre }} {{ $a1->apellidos }}</td>
+                            <td>{{ $a2->nombre }} {{ $a2->apellidos }}</td>
+                            <td>
+                                <select name="resultados[{{ $i }}][resultado]" class="form-control">
+                                    <option value="">—</option>
+                                    <option value="blancas">Ganan blancas</option>
+                                    <option value="negras">Ganan negras</option>
+                                    <option value="tablas">Tablas</option>
+                                </select>
 
-        <button class="btn btn-success">Finalizar Sesión</button>
-    </form>
+                                <input type="hidden" name="resultados[{{ $i }}][alumno1_id]" value="{{ $comb['alumno1_id'] }}">
+                                <input type="hidden" name="resultados[{{ $i }}][alumno2_id]" value="{{ $comb['alumno2_id'] }}">
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+            <button class="btn btn-success">Finalizar Sesión</button>
+        </form>
+    @else
+        {{-- Ningún enfrentamiento generado --}}
+        <div class="alert alert-info">
+            Todos los alumnos descansan esta ronda. No hay enfrentamientos para registrar.
+        </div>
+        <a href="{{ route('enfrentamientos.index') }}" class="btn btn-primary">Volver a Enfrentamientos</a>
+    @endif
 </div>
 @endsection
