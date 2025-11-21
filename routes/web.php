@@ -36,6 +36,5 @@ Route::post('ranking', [ClasificacionController::class, 'rankingPost'])->name('c
 
 Route::post('/enfrentamientos/generar', [EnfrentamientoController::class, 'generar'])
      ->name('enfrentamientos.generar');
-
-Route::post('/enfrentamientos/multiple', [EnfrentamientoController::class, 'storeMultiple'])
+Route::post('/enfrentamientos/store-multiple', [EnfrentamientoController::class, 'storeMultiple'])
     ->name('enfrentamientos.storeMultiple');

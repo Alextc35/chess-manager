@@ -4,20 +4,19 @@
 <div class="container">
     <h1>Resultados de la Sesión</h1>
 
-    {{-- Mostrar BYE si existe --}}
-    @if(isset($bye) && $bye)
-        @php
-            $alumnoBye = $alumnos->firstWhere('id', $bye);
-        @endphp
-
-        <div class="alert alert-info">
-            <strong>{{ $alumnoBye->nombre }} {{ $alumnoBye->apellidos }}</strong>
-            descansa esta ronda.
-        </div>
+    {{-- Mostrar BYE si hay --}}
+    @if(isset($bye) && count($bye) > 0)
+        @foreach($bye as $id)
+            @php $alumnoBye = $alumnos->firstWhere('id', $id); @endphp
+            <div class="alert alert-info">
+                <strong>{{ $alumnoBye->nombre }} {{ $alumnoBye->apellidos }}</strong> descansa esta ronda.
+            </div>
+        @endforeach
     @endif
 
     <form action="{{ route('enfrentamientos.storeMultiple') }}" method="POST">
         @csrf
+        <input type="hidden" name="temporada_id" value="{{ $temporada->id }}">
 
         <table class="table table-bordered">
             <thead>
@@ -36,7 +35,6 @@
                     <tr>
                         <td>{{ $a1->nombre }} {{ $a1->apellidos }}</td>
                         <td>{{ $a2->nombre }} {{ $a2->apellidos }}</td>
-
                         <td>
                             <select name="resultados[{{ $i }}][resultado]" class="form-control">
                                 <option value="">—</option>
@@ -55,6 +53,5 @@
 
         <button class="btn btn-success">Finalizar Sesión</button>
     </form>
-
 </div>
 @endsection

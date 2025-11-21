@@ -1,27 +1,37 @@
-<form action="{{ route('enfrentamientos.generar') }}" method="POST">
-    @csrf
+@extends('layouts.app')
 
-    <div class="mb-3">
-        <label class="form-label">Seleccionar Liga</label>
-        <select name="liga" id="ligaSelect" class="form-select">
-            @foreach($ligas as $liga)
-                <option value="{{ $liga }}">{{ ucfirst($liga) }}</option>
-            @endforeach
-        </select>
-    </div>
+@section('content')
+<div class="container">
+    <h1>Generar Sesión de Enfrentamientos</h1>
 
-    <div id="alumnosContainer" class="mb-3">
-        {{-- Aquí se cargarán los checkboxes de alumnos vía JS --}}
-    </div>
+    <form action="{{ route('enfrentamientos.generar') }}" method="POST">
+        @csrf
+        <input type="hidden" name="temporada_id" value="{{ $temporada->id }}">
 
-    <button class="btn btn-success">Generar Sesión</button>
-</form>
+        {{-- Selección de Liga --}}
+        <div class="mb-3">
+            <label class="form-label">Seleccionar Liga</label>
+            <select name="liga" id="ligaSelect" class="form-select">
+                @foreach($ligas as $l)
+                    <option value="{{ $l }}" {{ $loop->first ? 'selected' : '' }}>{{ ucfirst($l) }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        {{-- Contenedor para checkboxes de alumnos --}}
+        <div id="alumnosContainer" class="mb-3">
+            {{-- Se llenará vía JS --}}
+        </div>
+
+        <button class="btn btn-success">Generar Sesión</button>
+    </form>
+</div>
 
 <script>
     const alumnosContainer = document.getElementById('alumnosContainer');
     const ligaSelect = document.getElementById('ligaSelect');
 
-    // Datos de alumnos por liga
+    // Datos de alumnos agrupados por liga
     const alumnosData = @json($temporada->alumnos->groupBy('liga'));
 
     function renderAlumnos(liga) {
@@ -40,6 +50,7 @@
 
     ligaSelect.addEventListener('change', e => renderAlumnos(e.target.value));
 
-    // Cargar la liga por defecto al inicio
+    // Renderizar la liga por defecto al cargar la página
     renderAlumnos(ligaSelect.value);
 </script>
+@endsection
