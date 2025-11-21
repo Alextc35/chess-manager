@@ -25,10 +25,10 @@ class EnfrentamientoController extends Controller
      */
     public function create()
     {
-        $alumnos = Alumno::orderBy('nombre')->get();
         $temporada = Temporada::orderBy('fecha_inicio', 'desc')->first();
+        $ligas = ['local', 'infantil'];
 
-        return view('enfrentamientos.multiple', compact('alumnos', 'temporada'));
+        return view('enfrentamientos.multiple', compact('temporada', 'ligas'));
     }
 
     /**
@@ -119,64 +119,76 @@ class EnfrentamientoController extends Controller
     {
         $request->validate([
             'alumnos' => 'required|array|min:2',
+            'liga' => 'required|in:local,infantil',
         ]);
 
         $ids = $request->alumnos;
-
-        // Mezcla aleatoria
         shuffle($ids);
 
         $combinaciones = [];
         $count = count($ids);
-
-        // Si es impar, el último queda libre
         $bye = null;
+
         if ($count % 2 !== 0) {
             $bye = array_pop($ids);
             $count--;
         }
 
-        // Generar parejas 1 vs 2, 3 vs 4, etc.
         for ($i = 0; $i < $count; $i += 2) {
             $combinaciones[] = [
                 'alumno1_id' => $ids[$i],
                 'alumno2_id' => $ids[$i + 1],
+                'liga' => $request->liga
             ];
         }
 
         $alumnos = Alumno::whereIn('id', $request->alumnos)->get();
+        $temporada = Temporada::orderBy('fecha_inicio', 'desc')->first();
 
-        return view('enfrentamientos.resultados', [
-            'combinaciones' => $combinaciones,
-            'bye' => $bye,
-            'alumnos' => $alumnos,
-            'temporada' => Temporada::orderBy('fecha_inicio', 'desc')->first(),
-        ]);
+        return view('enfrentamientos.resultados', compact('combinaciones', 'bye', 'alumnos', 'temporada'));
     }
 
     public function storeMultiple(Request $request)
     {
-        $resultados = $request->resultados;
+        $request->validate([
+            'resultados' => 'required|array',
+            'resultados.*.alumno1_id' => 'required|exists:alumnos,id',
+            'resultados.*.alumno2_id' => 'required|exists:alumnos,id',
+            'resultados.*.resultado' => 'nullable|in:blancas,negras,tablas',
+        ]);
+
+        $resultados = $request->input('resultados'); // <-- aquí lo defines
         $temporada = Temporada::orderBy('fecha_inicio', 'desc')->first();
 
         foreach ($resultados as $res) {
+            $exists = Enfrentamiento::where('temporada_id', $temporada->id)
+                ->where(function($q) use ($res) {
+                    $q->where(function($q2) use ($res) {
+                        $q2->where('alumno1_id', $res['alumno1_id'])
+                        ->where('alumno2_id', $res['alumno2_id']);
+                    })->orWhere(function($q2) use ($res) {
+                        $q2->where('alumno1_id', $res['alumno2_id'])
+                        ->where('alumno2_id', $res['alumno1_id']);
+                    });
+                })->exists();
 
-            $enf = Enfrentamiento::create([
-                'temporada_id' => $temporada->id,
-                'alumno1_id' => $res['alumno1_id'],
-                'alumno2_id' => $res['alumno2_id'],
-                'resultado'  => $res['resultado'] ?? null,
-                'fecha' => now(),
-            ]);
+            if (!$exists) {
+                Enfrentamiento::create([
+                    'temporada_id' => $temporada->id,
+                    'alumno1_id'   => $res['alumno1_id'],
+                    'alumno2_id'   => $res['alumno2_id'],
+                    'resultado'    => $res['resultado'] ?? null,
+                    'fecha'        => now(),
+                ]);
 
-            // asociar alumnos a temporada
-            $temporada->alumnos()->syncWithoutDetaching([
-                $res['alumno1_id'], 
-                $res['alumno2_id']
-            ]);
+                $temporada->alumnos()->syncWithoutDetaching([
+                    $res['alumno1_id'], 
+                    $res['alumno2_id']
+                ]);
+            }
         }
 
         return redirect()->route('enfrentamientos.index')
-            ->with('success', 'Sesión creada con todos los enfrentamientos.');
+                        ->with('success', 'Sesión creada con todos los enfrentamientos.');
     }
 }
