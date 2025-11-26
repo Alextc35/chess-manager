@@ -253,7 +253,7 @@ class EnfrentamientoController extends Controller
             }
         }
 
-        return redirect()->route('temporadas.enfrentamientos', $temporada)
+        return redirect()->route('enfrentamientos.index')
                         ->with('success', 'Sesión registrada correctamente.');
     }
 }
