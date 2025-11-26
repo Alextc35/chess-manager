@@ -34,7 +34,7 @@ Route::patch('/temporadas/{temporada}/finalizar', [TemporadaController::class, '
 Route::get('ranking', [ClasificacionController::class, 'ranking'])->name('clasificacions.ranking');
 Route::post('ranking', [ClasificacionController::class, 'rankingPost'])->name('clasificacions.rankingPost');
 
-Route::post('/enfrentamientos/generar', [EnfrentamientoController::class, 'generar'])
-     ->name('enfrentamientos.generar');
-Route::post('/enfrentamientos/store-multiple', [EnfrentamientoController::class, 'storeMultiple'])
-    ->name('enfrentamientos.storeMultiple');
+Route::post('/enfrentamientos/generar-sesiones', [EnfrentamientoController::class, 'generarSesiones'])
+    ->name('enfrentamientos.generarSesiones');
+Route::post('/enfrentamientos/guardar-sesion', [EnfrentamientoController::class, 'guardarSesion'])
+    ->name('enfrentamientos.guardarSesion');

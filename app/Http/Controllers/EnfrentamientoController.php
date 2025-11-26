@@ -17,6 +17,7 @@ class EnfrentamientoController extends Controller
         $enfrentamientos = Enfrentamiento::with(['alumno1', 'alumno2', 'temporada'])
         ->orderBy('fecha', 'desc')
         ->get();
+
         return view('enfrentamientos.index', compact('enfrentamientos'));
     }
 
@@ -117,7 +118,10 @@ class EnfrentamientoController extends Controller
             ->with('success', 'Enfrentamiento eliminado correctamente.');
     }
 
-    public function generar(Request $request)
+    /**
+     * Genera enfrentamientos tipo mini-round-robin considerando asistencia y alternancia de colores.
+     */
+    public function generarSesiones(Request $request)
     {
         $request->validate([
             'alumnos' => 'required|array|min:2',
@@ -128,13 +132,16 @@ class EnfrentamientoController extends Controller
         $temporada = Temporada::find($request->temporada_id);
         $liga = $request->liga;
 
-        // Solo alumnos de la liga seleccionada
+        // Alumnos presentes de la liga seleccionada
         $alumnosIds = Alumno::whereIn('id', $request->alumnos)
                             ->where('liga', $liga)
                             ->pluck('id')
                             ->toArray();
 
-        shuffle($alumnosIds);
+        // Asociar automáticamente a la temporada si no lo están
+        $temporada->alumnos()->syncWithoutDetaching($alumnosIds);
+
+        shuffle($alumnosIds); // aleatorizar para variar colores
 
         $combinaciones = [];
         $bye = [];
@@ -143,43 +150,47 @@ class EnfrentamientoController extends Controller
             $al1 = array_shift($alumnosIds);
             $paired = false;
 
-            // Intentamos emparejar al1 con el primer posible compañero
             foreach ($alumnosIds as $index => $al2) {
-
-                // Comprobar si ya jugaron ambos colores
-                $alreadyPlayed = Enfrentamiento::where('temporada_id', $temporada->id)
+                // Comprobar enfrentamientos previos
+                $matches = Enfrentamiento::where('temporada_id', $temporada->id)
                     ->where(function($q) use ($al1, $al2) {
                         $q->where(function($q2) use ($al1, $al2) {
-                            $q2->where('alumno1_id', $al1)
-                            ->where('alumno2_id', $al2);
+                            $q2->where('alumno1_id', $al1)->where('alumno2_id', $al2);
                         })->orWhere(function($q2) use ($al1, $al2) {
-                            $q2->where('alumno1_id', $al2)
-                            ->where('alumno2_id', $al1);
+                            $q2->where('alumno1_id', $al2)->where('alumno2_id', $al1);
                         });
-                    })->count();
+                    })->get();
 
-                if ($alreadyPlayed < 2) {
-                    // Pueden jugar (menos de 2 enfrentamientos)
-                    $combinaciones[] = [
-                        'alumno1_id' => $al1,
-                        'alumno2_id' => $al2,
-                        'liga' => $liga
-                    ];
+                // Si ya jugaron ambos colores, saltamos
+                if ($matches->count() >= 2) continue;
 
-                    // Eliminamos al2 de la lista de pendientes
-                    array_splice($alumnosIds, $index, 1);
-                    $paired = true;
-                    break;
+                // Determinar colores: si ya jugaron, invertimos
+                $alumno1_id = $al1;
+                $alumno2_id = $al2;
+                if ($matches->count() === 1) {
+                    $prev = $matches->first();
+                    if ($prev->alumno1_id == $al1) {
+                        $alumno1_id = $al2;
+                        $alumno2_id = $al1;
+                    }
                 }
+
+                $combinaciones[] = [
+                    'alumno1_id' => $alumno1_id,
+                    'alumno2_id' => $alumno2_id,
+                    'liga' => $liga,
+                ];
+
+                array_splice($alumnosIds, $index, 1);
+                $paired = true;
+                break;
             }
 
             if (!$paired) {
-                // No hay compañero disponible => queda libre
                 $bye[] = $al1;
             }
         }
 
-        // Si queda un alumno suelto al final
         if (count($alumnosIds) === 1) {
             $bye[] = array_shift($alumnosIds);
         }
@@ -194,7 +205,10 @@ class EnfrentamientoController extends Controller
         ]);
     }
 
-    public function storeMultiple(Request $request)
+    /**
+     * Guarda los resultados de la sesión generada.
+     */
+    public function guardarSesion(Request $request)
     {
         $request->validate([
             'temporada_id' => 'required|exists:temporadas,id',
@@ -202,35 +216,41 @@ class EnfrentamientoController extends Controller
         ]);
 
         $temporada = Temporada::find($request->temporada_id);
-        $resultados = $request->resultados;
 
-        foreach ($resultados as $res) {
+        foreach ($request->resultados as $res) {
             $al1 = $res['alumno1_id'];
-            $al2 = $res['alumno2_id'];
+            $al2 = $res['alumno2_id'] ?? null;
             $resultado = $res['resultado'] ?? null;
 
-            // Revisar si ya existe un enfrentamiento con estos colores
-            $exists = Enfrentamiento::where('temporada_id', $temporada->id)
-                ->where('alumno1_id', $al1)
-                ->where('alumno2_id', $al2)
-                ->exists();
+            if ($al2) {
+                // Revisar si ya jugaron dos veces (ida y vuelta)
+                $matches = Enfrentamiento::where('temporada_id', $temporada->id)
+                    ->where(function($q) use ($al1, $al2) {
+                        $q->where(function($q2) use ($al1, $al2) {
+                            $q2->where('alumno1_id', $al1)->where('alumno2_id', $al2);
+                        })->orWhere(function($q2) use ($al1, $al2) {
+                            $q2->where('alumno1_id', $al2)->where('alumno2_id', $al1);
+                        });
+                    })->count();
 
-            if (!$exists) {
-                // Crear nuevo enfrentamiento
-                Enfrentamiento::create([
-                    'temporada_id' => $temporada->id,
-                    'alumno1_id'   => $al1,
-                    'alumno2_id'   => $al2,
-                    'resultado'    => $resultado,
-                    'fecha'        => now(),
-                ]);
+                if ($matches < 2) {
+                    // Crear un nuevo enfrentamiento, nunca sobrescribir
+                    Enfrentamiento::create([
+                        'temporada_id' => $temporada->id,
+                        'alumno1_id'   => $al1,
+                        'alumno2_id'   => $al2,
+                        'resultado'    => $resultado,
+                        'fecha'        => now(),
+                    ]);
+                }
 
-                // Asociar alumnos a la temporada
                 $temporada->alumnos()->syncWithoutDetaching([$al1, $al2]);
+            } else {
+                $temporada->alumnos()->syncWithoutDetaching([$al1]);
             }
         }
 
-        return redirect()->route('enfrentamientos.index')
-                        ->with('success', 'Sesión creada con todos los enfrentamientos.');
+        return redirect()->route('temporadas.enfrentamientos', $temporada)
+                        ->with('success', 'Sesión registrada correctamente.');
     }
 }

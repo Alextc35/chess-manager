@@ -15,7 +15,7 @@
     @endif
 
     @if(isset($combinaciones) && count($combinaciones) > 0)
-        <form action="{{ route('enfrentamientos.storeMultiple') }}" method="POST">
+        <form action="{{ route('enfrentamientos.guardarSesion') }}" method="POST">
             @csrf
             <input type="hidden" name="temporada_id" value="{{ $temporada->id }}">
 
@@ -28,24 +28,33 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($combinaciones as $i => $comb)
-                        @php
-                            $a1 = $alumnos->firstWhere('id', $comb['alumno1_id']);
-                            $a2 = $alumnos->firstWhere('id', $comb['alumno2_id']);
-                        @endphp
+                    @foreach($combinaciones as $i => $s)
                         <tr>
-                            <td>{{ $a1->nombre }} {{ $a1->apellidos }}</td>
-                            <td>{{ $a2->nombre }} {{ $a2->apellidos }}</td>
                             <td>
-                                <select name="resultados[{{ $i }}][resultado]" class="form-control">
-                                    <option value="">—</option>
-                                    <option value="blancas">Ganan blancas</option>
-                                    <option value="negras">Ganan negras</option>
-                                    <option value="tablas">Tablas</option>
-                                </select>
+                                {{ $alumnos->find($s['alumno1_id'])->nombre }} {{ $alumnos->find($s['alumno1_id'])->apellidos }}
+                            </td>
+                            <td>
+                                @if($s['alumno2_id'])
+                                    {{ $alumnos->find($s['alumno2_id'])->nombre }} {{ $alumnos->find($s['alumno2_id'])->apellidos }}
+                                @else
+                                    <em>Descansa</em>
+                                @endif
+                            </td>
+                            <td>
+                                @if($s['alumno2_id'])
+                                    <select name="resultados[{{ $i }}][resultado]" class="form-control">
+                                        <option value="">—</option>
+                                        <option value="blancas">Ganan blancas</option>
+                                        <option value="negras">Ganan negras</option>
+                                        <option value="tablas">Tablas</option>
+                                    </select>
 
-                                <input type="hidden" name="resultados[{{ $i }}][alumno1_id]" value="{{ $comb['alumno1_id'] }}">
-                                <input type="hidden" name="resultados[{{ $i }}][alumno2_id]" value="{{ $comb['alumno2_id'] }}">
+                                    <input type="hidden" name="resultados[{{ $i }}][alumno1_id]" value="{{ $s['alumno1_id'] }}">
+                                    <input type="hidden" name="resultados[{{ $i }}][alumno2_id]" value="{{ $s['alumno2_id'] }}">
+                                @else
+                                    <input type="hidden" name="resultados[{{ $i }}][alumno1_id]" value="{{ $s['alumno1_id'] }}">
+                                    <input type="hidden" name="resultados[{{ $i }}][alumno2_id]" value="">
+                                @endif
                             </td>
                         </tr>
                     @endforeach
@@ -55,11 +64,11 @@
             <button class="btn btn-success">Finalizar Sesión</button>
         </form>
     @else
-        {{-- Ningún enfrentamiento generado --}}
         <div class="alert alert-info">
             Todos los alumnos descansan esta ronda. No hay enfrentamientos para registrar.
         </div>
         <a href="{{ route('enfrentamientos.index') }}" class="btn btn-primary">Volver a Enfrentamientos</a>
     @endif
+
 </div>
 @endsection

@@ -13,10 +13,6 @@
         Volver a la temporada
     </a>
 
-    @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
-
     @if($enfrentamientos->isEmpty())
         <div class="alert alert-info">
             No hay enfrentamientos registrados todavía.

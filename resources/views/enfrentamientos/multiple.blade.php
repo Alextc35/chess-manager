@@ -4,7 +4,7 @@
 <div class="container">
     <h1>Generar Sesión de Enfrentamientos</h1>
 
-    <form action="{{ route('enfrentamientos.generar') }}" method="POST">
+    <form action="{{ route('enfrentamientos.generarSesiones') }}" method="POST">
         @csrf
         <input type="hidden" name="temporada_id" value="{{ $temporada->id }}">
 
