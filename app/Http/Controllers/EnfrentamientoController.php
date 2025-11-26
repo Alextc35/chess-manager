@@ -27,10 +27,13 @@ class EnfrentamientoController extends Controller
     public function create()
     {
         $alumnos = Alumno::all();
-        $temporada = Temporada::orderBy('fecha_inicio', 'desc')->first();
+        $temporadas = Temporada::whereNull('fecha_fin')
+            ->orWhere('fecha_fin', '>=', now())
+            ->orderBy('fecha_inicio', 'desc')
+            ->get();
         $ligas = ['local', 'infantil'];
 
-        return view('enfrentamientos.multiple', compact('alumnos', 'temporada', 'ligas'));
+        return view('enfrentamientos.multiple', compact('alumnos', 'temporadas', 'ligas'));
     }
 
     /**

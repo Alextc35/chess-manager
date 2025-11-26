@@ -6,7 +6,6 @@
 
     <form action="{{ route('enfrentamientos.generarSesiones') }}" method="POST">
         @csrf
-        <input type="hidden" name="temporada_id" value="{{ $temporada->id }}">
 
         {{-- Selección de Liga --}}
         <div class="mb-3">
@@ -14,6 +13,15 @@
             <select name="liga" id="ligaSelect" class="form-select">
                 @foreach($ligas as $l)
                     <option value="{{ $l }}" {{ $loop->first ? 'selected' : '' }}>{{ ucfirst($l) }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Seleccionar Temporada</label>
+            <select name="temporada_id" class="form-select" required>
+                @foreach($temporadas as $temporada)
+                    <option value="{{ $temporada->id }}">{{ $temporada->nombre }} ({{ \Carbon\Carbon::parse($temporada->fecha_inicio)->format('d/m/Y') }})</option>
                 @endforeach
             </select>
         </div>
