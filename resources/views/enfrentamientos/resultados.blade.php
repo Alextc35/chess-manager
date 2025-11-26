@@ -5,7 +5,7 @@
     <h1>Resultados de la Sesión</h1>
 
     {{-- Mostrar BYE si hay --}}
-    @if(isset($bye) && count($bye) > 0)
+    @if(isset($bye) && count($bye) > 0 && count($bye) < count($alumnos))
         @foreach($bye as $id)
             @php $alumnoBye = $alumnos->firstWhere('id', $id); @endphp
             <div class="alert alert-info">
