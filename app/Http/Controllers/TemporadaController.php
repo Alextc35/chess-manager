@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Temporada;
+use App\Models\Alumno;
 use Illuminate\Http\Request;
 
 class TemporadaController extends Controller
