@@ -59,7 +59,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="3" class="text-center text-muted">No hay alumnos en esta liga.</td>
+                        <td colspan="3" class="text-center text-muted">No hay alumnos en esta temporada.</td>
                     </tr>
                 @endforelse
             </tbody>
