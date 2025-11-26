@@ -26,11 +26,17 @@ class EnfrentamientoController extends Controller
      */
     public function create()
     {
-        $alumnos = Alumno::all();
         $temporadas = Temporada::whereNull('fecha_fin')
             ->orWhere('fecha_fin', '>=', now())
             ->orderBy('fecha_inicio', 'desc')
             ->get();
+
+        if ($temporadas->isEmpty()) {
+            return redirect()->route('enfrentamientos.index')
+                ->with('error', 'No hay temporadas activas. Primero crea una temporada para generar enfrentamientos.');
+        }
+
+        $alumnos = Alumno::all();
         $ligas = ['local', 'infantil'];
 
         return view('enfrentamientos.multiple', compact('alumnos', 'temporadas', 'ligas'));
