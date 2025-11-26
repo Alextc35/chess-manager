@@ -33,6 +33,14 @@
     @elseif(!$liga)
         <div class="alert alert-secondary">Seleccione una liga para ver la clasificación.</div>
     @else
+        {{-- Aviso si la temporada está finalizada --}}
+        @if($temporada->fecha_fin)
+            <div class="alert alert-warning alert-dismissible fade show">
+                La temporada <strong>{{ $temporada->nombre }}</strong> finalizó el {{ \Carbon\Carbon::parse($temporada->fecha_fin)->format('d/m/Y') }}.
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+
         <h4 class="mt-4 mb-2">Clasificación — Liga {{ ucfirst($liga) }}</h4>
         <table class="table table-striped table-sm">
             <thead>
