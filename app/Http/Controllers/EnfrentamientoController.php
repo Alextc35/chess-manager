@@ -25,10 +25,11 @@ class EnfrentamientoController extends Controller
      */
     public function create()
     {
+        $alumnos = Alumno::all();
         $temporada = Temporada::orderBy('fecha_inicio', 'desc')->first();
         $ligas = ['local', 'infantil'];
 
-        return view('enfrentamientos.multiple', compact('temporada', 'ligas'));
+        return view('enfrentamientos.multiple', compact('alumnos', 'temporada', 'ligas'));
     }
 
     /**

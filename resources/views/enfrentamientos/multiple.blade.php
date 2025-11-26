@@ -32,7 +32,7 @@
     const ligaSelect = document.getElementById('ligaSelect');
 
     // Datos de alumnos agrupados por liga
-    const alumnosData = @json($temporada->alumnos->groupBy('liga'));
+    const alumnosData = @json($alumnos->groupBy('liga'));
 
     function renderAlumnos(liga) {
         alumnosContainer.innerHTML = '';
