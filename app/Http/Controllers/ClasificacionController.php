@@ -20,9 +20,21 @@ class ClasificacionController extends Controller
 
         $liga = $request->input('liga', 'local'); // liga por defecto
 
-        $ranking = null;
+        $ranking = collect();
+
         if ($temporada) {
-            $ranking = $this->calcularRankingLiga($temporada, $liga);
+            $rankingArray = $this->calcularRankingLiga($temporada, $liga);
+
+            $page = request('page', 1);
+            $perPage = 16;
+
+            $ranking = new \Illuminate\Pagination\LengthAwarePaginator(
+                array_slice($rankingArray, ($page - 1) * $perPage, $perPage),
+                count($rankingArray),
+                $perPage,
+                $page,
+                ['path' => request()->url(), 'query' => request()->query()]
+            );
         }
 
         return view('clasificacions.index', compact(
@@ -119,7 +131,18 @@ class ClasificacionController extends Controller
         $temporada = Temporada::find($request->temporada_id);
         $liga = $request->input('liga');
 
-        $ranking = $this->calcularRankingLiga($temporada, $liga);
+        $rankingArray = $this->calcularRankingLiga($temporada, $liga);
+
+        $page = request('page', 1);
+        $perPage = 16;
+
+        $ranking = new \Illuminate\Pagination\LengthAwarePaginator(
+            array_slice($rankingArray, ($page - 1) * $perPage, $perPage),
+            count($rankingArray),
+            $perPage,
+            $page,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
 
         return view('clasificacions.index', compact(
             'temporadas',

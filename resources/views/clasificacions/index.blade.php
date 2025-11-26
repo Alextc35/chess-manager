@@ -56,6 +56,9 @@
                 @endforelse
             </tbody>
         </table>
+        <div class="mt-3">
+            {{ $ranking->links('pagination::bootstrap-5') }}
+        </div>
     @endif
 </div>
 @endsection
