@@ -13,7 +13,8 @@ class TemporadaController extends Controller
      */
     public function index()
     {
-        $temporadas = Temporada::orderBy('fecha_inicio', 'desc')->get();
+        $temporadas = Temporada::orderBy('fecha_inicio', 'desc')->paginate(3);
+        
         return view('temporadas.index', compact('temporadas'));
     }
 
