@@ -109,6 +109,7 @@ class EnfrentamientoController extends Controller
      */
     public function destroy(Temporada $temporada, Enfrentamiento $enfrentamiento)
     {
+        $temporada = $enfrentamiento->temporada;
         $enfrentamiento->delete();
 
         return redirect()
