@@ -16,7 +16,7 @@ class EnfrentamientoController extends Controller
     {
         $enfrentamientos = Enfrentamiento::with(['alumno1', 'alumno2', 'temporada'])
         ->orderBy('fecha', 'desc')
-        ->get();
+        ->paginate(10);
 
         return view('enfrentamientos.index', compact('enfrentamientos'));
     }
