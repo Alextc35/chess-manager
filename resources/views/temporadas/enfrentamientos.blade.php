@@ -9,8 +9,8 @@
         Nuevo Enfrentamiento
     </a>
 
-    <a href="{{ route('temporadas.show', $temporada) }}" class="btn btn-secondary mb-3">
-        Volver a la temporada
+    <a href="{{ route('enfrentamientos.index') }}" class="btn btn-secondary mb-3">
+        Volver a los Enfrentamientos
     </a>
 
     @if($enfrentamientos->isEmpty())
