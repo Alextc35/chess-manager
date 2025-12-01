@@ -12,6 +12,7 @@ class Enfrentamiento extends Model
         'alumno2_id',
         'resultado',
         'fecha',
+        'liga',
     ];
 
     public function temporada()

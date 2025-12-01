@@ -47,32 +47,8 @@ class EnfrentamientoController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'alumno1_id' => 'required|exists:alumnos,id|different:alumno2_id',
-            'alumno2_id' => 'required|exists:alumnos,id',
-            'resultado' => 'nullable|in:blancas,negras,tablas',
-            'temporada_id' => 'nullable|exists:temporadas,id'
-        ]);
-
-        // Si no se pasa temporada, usamos la última
-        $temporada = $request->temporada_id 
-            ? Temporada::find($request->temporada_id)
-            : Temporada::orderBy('fecha_inicio', 'desc')->first();
-
-        // Creamos el enfrentamiento
-        $enfrentamiento = Enfrentamiento::create([
-            'alumno1_id' => $request->alumno1_id,
-            'alumno2_id' => $request->alumno2_id,
-            'resultado' => $request->resultado,
-            'temporada_id' => $temporada->id,
-            'fecha' => now()
-        ]);
-
-        // Asociamos automáticamente alumnos a la temporada si no lo están
-        $temporada->alumnos()->syncWithoutDetaching([$request->alumno1_id, $request->alumno2_id]);
-
-        return redirect()->route('enfrentamientos.index')
-            ->with('success', 'Enfrentamiento creado y alumnos asociados a la temporada.');
+        // La lógica de almacenamiento se maneja en guardarSesion()
+        return redirect()->route('enfrentamientos.index');
     }
 
     /**
@@ -228,6 +204,8 @@ class EnfrentamientoController extends Controller
             $al1 = $res['alumno1_id'];
             $al2 = $res['alumno2_id'] ?? null;
             $resultado = $res['resultado'] ?? null;
+            $alumno1 = Alumno::find($al1);
+            $liga = $res['liga'] ?? $alumno1->liga;
 
             if ($al2) {
                 // Revisar si ya jugaron dos veces (ida y vuelta)
@@ -248,6 +226,7 @@ class EnfrentamientoController extends Controller
                         'alumno2_id'   => $al2,
                         'resultado'    => $resultado,
                         'fecha'        => now(),
+                        'liga'         => $liga,
                     ]);
                 }
 

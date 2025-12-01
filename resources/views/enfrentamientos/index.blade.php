@@ -12,6 +12,7 @@
             <thead>
                 <tr>
                     <th>Temporada</th>
+                    <th>Liga</th>
                     <th>Jugador 1 (Blancas)</th>
                     <th>Jugador 2 (Negras)</th>
                     <th>Resultado</th>
@@ -23,6 +24,7 @@
                 @foreach($enfrentamientos as $e)
                 <tr>
                     <td>{{ $e->temporada->nombre }}</td>
+                    <td>{{ $e->liga }}</td>
                     <td>{{ $e->alumno1->nombre }} {{ $e->alumno1->apellidos }}</td>
                     <td>{{ $e->alumno2->nombre }} {{ $e->alumno2->apellidos }}</td>
                     <td>{{ $e->resultado ?? '-' }}</td>
