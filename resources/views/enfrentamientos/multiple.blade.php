@@ -31,6 +31,10 @@
             {{-- Se llenará vía JS --}}
         </div>
 
+        <div id="alertaJugadores" class="alert alert-info d-none">
+            Selecciona dos alumnos como mínimo para generar una sesión.
+        </div>
+
         <button class="btn btn-success">Generar Sesión</button>
     </form>
 </div>
@@ -38,27 +42,47 @@
 <script>
     const alumnosContainer = document.getElementById('alumnosContainer');
     const ligaSelect = document.getElementById('ligaSelect');
+    const alertaJugadores = document.getElementById('alertaJugadores');
 
     // Datos de alumnos agrupados por liga
     const alumnosData = @json($alumnos->groupBy('liga'));
 
     function renderAlumnos(liga) {
         alumnosContainer.innerHTML = '';
+        alertaJugadores.classList.add('d-none'); // ocultar al cambiar de liga
+
         const alumnos = alumnosData[liga] || [];
+
         alumnos.forEach(a => {
             const div = document.createElement('div');
             div.className = 'form-check';
             div.innerHTML = `
-                <input class="form-check-input" type="checkbox" name="alumnos[]" value="${a.id}" id="alumno${a.id}">
+                <input class="form-check-input alumnoCheck" type="checkbox" name="alumnos[]" value="${a.id}" id="alumno${a.id}">
                 <label class="form-check-label" for="alumno${a.id}">${a.nombre} ${a.apellidos}</label>
             `;
             alumnosContainer.appendChild(div);
         });
+
+        // Añadir evento a los nuevos checkboxes
+        document.querySelectorAll('.alumnoCheck').forEach(chk => {
+            chk.addEventListener('change', validarSeleccion);
+        });
+
+        validarSeleccion(); // validar al cargar
+    }
+
+    // Mostrar/ocultar alerta
+    function validarSeleccion() {
+        const seleccionados = document.querySelectorAll('.alumnoCheck:checked').length;
+
+        if (seleccionados < 2) {
+            alertaJugadores.classList.remove('d-none');
+        } else {
+            alertaJugadores.classList.add('d-none');
+        }
     }
 
     ligaSelect.addEventListener('change', e => renderAlumnos(e.target.value));
-
-    // Renderizar la liga por defecto al cargar la página
     renderAlumnos(ligaSelect.value);
 </script>
 @endsection
