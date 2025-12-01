@@ -4,24 +4,27 @@
 <div class="container">
     <h1>Alumnos</h1>
 
-    <div class="mb-3 d-flex align-items-center">
-        <div class="input-group me-2">
-            <input type="text" id="busqueda" class="form-control" placeholder="Buscar alumno por nombre o apellido" value="{{ request('q') }}">
-            <button class="btn btn-outline-secondary d-none" type="button" id="btn-reset" title="Borrar filtros">&times;</button>
-        </div>
-
-        <select id="filtro-liga" class="form-select me-2 w-auto">
-            <option value="">Todas las ligas</option>
-            <option value="local" {{ request('liga') == 'local' ? 'selected' : '' }}>Local</option>
-            <option value="infantil" {{ request('liga') == 'infantil' ? 'selected' : '' }}>Infantil</option>
-        </select>
-    </div>
-
     <a href="{{ route('alumnos.create') }}" class="btn btn-success mb-3">Nuevo Alumno</a>
 
-    <div id="tabla-alumnos">
-        @include('alumnos.partials.tabla', ['alumnos' => $alumnos])
-    </div>
+    @if(!$alumnos->count())
+        <div class="alert alert-info">No se encontraron alumnos.</div>
+    @else
+        <div class="mb-3 d-flex align-items-center">
+            <div class="input-group me-2">
+                <input type="text" id="busqueda" class="form-control" placeholder="Buscar alumno por nombre o apellido" value="{{ request('q') }}">
+                <button class="btn btn-outline-secondary d-none" type="button" id="btn-reset" title="Borrar filtros">&times;</button>
+            </div>
+
+            <select id="filtro-liga" class="form-select me-2 w-auto">
+                <option value="">Todas las ligas</option>
+                <option value="local" {{ request('liga') == 'local' ? 'selected' : '' }}>Local</option>
+                <option value="infantil" {{ request('liga') == 'infantil' ? 'selected' : '' }}>Infantil</option>
+            </select>
+        </div>
+        <div id="tabla-alumnos">
+            @include('alumnos.partials.tabla', ['alumnos' => $alumnos])
+        </div>
+    @endif
 </div>
 @endsection
 
