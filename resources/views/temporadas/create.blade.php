@@ -23,7 +23,7 @@
             <input type="date"
                    name="fecha_inicio"
                    class="form-control"
-                   value="{{ old('fecha_inicio') }}"
+                   value="{{ old('fecha_inicio', now()->format('Y-m-d')) }}"
                    required>
         </div>
 
