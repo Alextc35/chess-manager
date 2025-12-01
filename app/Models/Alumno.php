@@ -13,6 +13,10 @@ class Alumno extends Model
         'liga',
     ];
 
+    protected $casts = [
+        'fecha_nacimiento' => 'date',
+    ];
+
     public function clasificacions()
     {
         return $this->hasMany(Clasificacion::class);
