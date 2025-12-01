@@ -9,7 +9,7 @@
         <div class="alert alert-secondary">Seleccione una liga para ver la clasificación.</div>
     @else
         {{-- Formulario para seleccionar temporada y liga --}}
-        <form action="{{ route('clasificacions.rankingPost') }}" method="POST" class="row g-3 mb-4">
+        <form action="{{ route('clasificacions.index') }}" method="GET" class="row g-3 mb-4">
             @csrf
             <div class="col-md-4">
                 <label class="form-label fw-bold">Temporada</label>

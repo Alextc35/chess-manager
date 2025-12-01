@@ -16,16 +16,19 @@ class ClasificacionController extends Controller
     public function index(Request $request)
     {
         $temporadas = Temporada::orderBy('fecha_inicio', 'desc')->get();
-        $temporada = $temporadas->first();
+        
+        $temporada_id = $request->input('temporada_id');
+        $liga = $request->input('liga', 'local');
 
-        $liga = $request->input('liga', 'local'); // liga por defecto
+        // Elegir temporada
+        $temporada = $temporadas->firstWhere('id', $temporada_id) ?? $temporadas->first();
 
         $ranking = collect();
 
         if ($temporada) {
             $rankingArray = $this->calcularRankingLiga($temporada, $liga);
 
-            $page = request('page', 1);
+            $page = $request->input('page', 1);
             $perPage = 16;
 
             $ranking = new \Illuminate\Pagination\LengthAwarePaginator(
@@ -33,16 +36,14 @@ class ClasificacionController extends Controller
                 count($rankingArray),
                 $perPage,
                 $page,
-                ['path' => request()->url(), 'query' => request()->query()]
+                [
+                    'path' => $request->url(),
+                    'query' => $request->query(), // mantiene temporada_id y liga
+                ]
             );
         }
 
-        return view('clasificacions.index', compact(
-            'temporadas',
-            'temporada',
-            'liga',
-            'ranking'
-        ));
+        return view('clasificacions.index', compact('temporadas', 'temporada', 'liga', 'ranking'));
     }
 
     /**
@@ -118,38 +119,6 @@ class ClasificacionController extends Controller
 
         return redirect()->route('clasificacions.index')
                          ->with('success', 'Clasificación eliminada correctamente.');
-    }
-
-    public function rankingPost(Request $request)
-    {
-        $request->validate([
-            'temporada_id' => 'required|exists:temporadas,id',
-            'liga' => 'required|in:local,infantil',
-        ]);
-
-        $temporadas = Temporada::orderBy('fecha_inicio', 'desc')->get();
-        $temporada = Temporada::find($request->temporada_id);
-        $liga = $request->input('liga');
-
-        $rankingArray = $this->calcularRankingLiga($temporada, $liga);
-
-        $page = request('page', 1);
-        $perPage = 16;
-
-        $ranking = new \Illuminate\Pagination\LengthAwarePaginator(
-            array_slice($rankingArray, ($page - 1) * $perPage, $perPage),
-            count($rankingArray),
-            $perPage,
-            $page,
-            ['path' => request()->url(), 'query' => request()->query()]
-        );
-
-        return view('clasificacions.index', compact(
-            'temporadas',
-            'temporada',
-            'liga',
-            'ranking'
-        ));
     }
 
     private function calcularRankingLiga($temporada, $liga)
