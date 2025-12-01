@@ -20,12 +20,12 @@
             @foreach($temporadas as $temporada)
             <tr>
                 <td>{{ $temporada->nombre }}</td>
-                <td>{{ \Carbon\Carbon::parse($temporada->fecha_inicio)->format('d/m/Y') }}</td>
+                <td>{{ $temporada->fecha_inicio->format('d/m/Y') }}</td>
 
                 {{-- Fecha fin o EN CURSO --}}
                 <td>
                     @if($temporada->fecha_fin)
-                        {{ \Carbon\Carbon::parse($temporada->fecha_fin)->format('d/m/Y') }}
+                        {{ $temporada->fecha_fin->format('d/m/Y') }}
                     @else
                         —
                     @endif
@@ -41,7 +41,7 @@
                 </td>
 
                 <td>
-                    <a href="{{ route('temporadas.show', $temporada) }}" class="btn btn-info btn-sm">Ver</a>
+                    {{-- <a href="{{ route('temporadas.show', $temporada) }}" class="btn btn-info btn-sm">Ver</a> --}}
 
                     <a href="{{ route('temporadas.edit', $temporada) }}" class="btn btn-warning btn-sm">Editar</a>
 
