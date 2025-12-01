@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container">
-    <h1>Editar Resultado - {{ $enfrentamiento->temporada->nombre }}</h1>
+    <h1>Editar Resultado - {{ $enfrentamiento->temporada->nombre }} ({{ $enfrentamiento->liga }})</h1>
 
     <form action="{{ route('enfrentamientos.update', $enfrentamiento) }}" method="POST">
         @csrf
