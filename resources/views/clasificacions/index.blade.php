@@ -36,7 +36,7 @@
         {{-- Aviso si la temporada está finalizada --}}
         @if($temporada->fecha_fin)
             <div class="alert alert-warning alert-dismissible fade show">
-                La temporada <strong>{{ $temporada->nombre }}</strong> finalizó el {{ \Carbon\Carbon::parse($temporada->fecha_fin)->format('d/m/Y') }}.
+                La temporada <strong>{{ $temporada->nombre }}</strong> finalizó el {{ $temporada->fecha_fin->format('d/m/Y') }}.
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         @endif
