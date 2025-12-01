@@ -49,9 +49,9 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($ranking as $i => $item)
+                @forelse($ranking as $index => $item)
                     <tr>
-                        <td>{{ $i + 1 }}</td>
+                        <td>{{ ($ranking->currentPage() - 1) * $ranking->perPage() + $index + 1 }}</td>
                         <td>{{ $item['alumno']->nombre }} {{ $item['alumno']->apellidos }}</td>
                         <td><strong>{{ $item['puntos'] }}</strong></td>
                     </tr>
