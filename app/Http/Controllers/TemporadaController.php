@@ -70,6 +70,7 @@ class TemporadaController extends Controller
         $request->validate([
             'nombre' => 'required|string|max:255',
             'fecha_inicio' => 'required|date',
+            'fecha_fin' => 'nullable|date|after_or_equal:fecha_inicio',
         ]);
 
         $temporada->update($request->all());

@@ -12,9 +12,9 @@ class Temporada extends Model
         'fecha_fin'
     ];
 
-    protected $dates = [
-        'fecha_inicio',
-        'fecha_fin'
+    protected $casts = [
+        'fecha_inicio' => 'date',
+        'fecha_fin' => 'date',
     ];
 
     public function alumnos()
