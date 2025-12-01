@@ -97,21 +97,19 @@ class EnfrentamientoController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Temporada $temporada, Enfrentamiento $enfrentamiento)
+    public function update(Request $request, Enfrentamiento $enfrentamiento)
     {
         $request->validate([
-            'alumno1_id' => 'required|different:alumno2_id',
-            'alumno2_id' => 'required|different:alumno1_id',
-            'puntos1' => 'required|integer|min:0',
-            'puntos2' => 'required|integer|min:0',
-            'fecha' => 'nullable|date'
+            'resultado' => 'required|in:blancas,negras,tablas',
         ]);
 
-        $enfrentamiento->update($request->all());
+        $enfrentamiento->update([
+            'resultado' => $request->resultado
+        ]);
 
         return redirect()
-            ->route('temporadas.enfrentamientos', $temporada)
-            ->with('success', 'Enfrentamiento actualizado correctamente.');
+            ->route('enfrentamientos.index')
+            ->with('success', 'Resultado del enfrentamiento actualizado correctamente.');
     }
 
     /**
