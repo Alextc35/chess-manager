@@ -110,6 +110,9 @@ class EnfrentamientoController extends Controller
             'alumnos' => 'required|array|min:2',
             'liga' => 'required|in:local,infantil',
             'temporada_id' => 'required|exists:temporadas,id',
+        ], [
+            'alumnos.required' => 'Debes seleccionar al menos dos alumnos para generar una sesión.',
+            'alumnos.min' => 'Debes seleccionar al menos dos alumnos para generar una sesión.',
         ]);
 
         $temporada = Temporada::find($request->temporada_id);

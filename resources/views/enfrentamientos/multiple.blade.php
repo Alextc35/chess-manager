@@ -21,7 +21,7 @@
             <label class="form-label">Seleccionar Temporada</label>
             <select name="temporada_id" class="form-select" required>
                 @foreach($temporadas as $temporada)
-                    <option value="{{ $temporada->id }}">{{ $temporada->nombre }} ({{ \Carbon\Carbon::parse($temporada->fecha_inicio)->format('d/m/Y') }})</option>
+                    <option value="{{ $temporada->id }}">{{ $temporada->nombre }} ({{ $temporada->fecha_inicio->format('d/m/Y') }})</option>
                 @endforeach
             </select>
         </div>
