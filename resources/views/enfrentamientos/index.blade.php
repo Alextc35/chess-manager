@@ -26,7 +26,7 @@
                 <td>{{ $e->resultado ?? '-' }}</td>
                 <td>{{ $e->fecha ?? '-' }}</td>
                 <td>
-                    <a href="{{ route('enfrentamientos.show', $e) }}" class="btn btn-info btn-sm">Ver</a>
+                    {{-- <a href="{{ route('enfrentamientos.show', $e) }}" class="btn btn-info btn-sm">Ver</a> --}}
                     <a href="{{ route('enfrentamientos.edit', $e) }}" class="btn btn-warning btn-sm">Editar</a>
                     <form action="{{ route('enfrentamientos.destroy', $e) }}" method="POST" style="display:inline-block;">
                         @csrf
