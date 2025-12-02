@@ -20,13 +20,18 @@
                     <li class="nav-item"><a class="nav-link" href="{{ route('temporadas.index') }}">Temporadas</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('clasificacions.index') }}">Clasificaciones</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('enfrentamientos.index') }}">Enfrentamientos</a></li>
-                    @auth
-                    <form action="{{ route('logout') }}" method="POST" class="d-inline">
-                        @csrf
-                        <button class="btn btn-link nav-link" style="cursor:pointer;">Cerrar sesión</button>
-                    </form>
-                    @endauth
                 </ul>
+
+                @auth
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <form action="{{ route('logout') }}" method="POST" class="d-inline">
+                            @csrf
+                            <button class="btn btn-link nav-link" style="cursor:pointer;">Cerrar sesión</button>
+                        </form>
+                    </li>
+                </ul>
+                @endauth
             </div>
         </div>
     </nav>
