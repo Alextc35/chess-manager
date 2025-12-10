@@ -38,9 +38,6 @@ Route::middleware('auth')->group(function () {
     Route::patch('/temporadas/{temporada}/finalizar', [TemporadaController::class, 'finalizar'])
         ->name('temporadas.finalizar');
 
-    Route::get('ranking', [ClasificacionController::class, 'ranking'])->name('clasificacions.ranking');
-    Route::post('ranking', [ClasificacionController::class, 'rankingPost'])->name('clasificacions.rankingPost');
-
     Route::post('/enfrentamientos/generar-sesiones', [EnfrentamientoController::class, 'generarSesiones'])
         ->name('enfrentamientos.generarSesiones');
     Route::post('/enfrentamientos/guardar-sesion', [EnfrentamientoController::class, 'guardarSesion'])
