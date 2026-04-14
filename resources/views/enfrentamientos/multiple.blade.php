@@ -45,7 +45,19 @@
     const alertaJugadores = document.getElementById('alertaJugadores');
 
     // Datos de alumnos agrupados por liga
-    const alumnosData = @json($alumnos->groupBy('liga'));
+    const alumnosData = @json(
+        $alumnos->groupBy('liga')->map(function ($grupo) {
+            return $grupo->map(function ($alumno) {
+                return [
+                    'id' => $alumno->id,
+                    'nombre' => $alumno->nombre,
+                    'apellidos' => $alumno->apellidos,
+                    'tiene_pagos_pendientes' => $alumno->tienePagosPendientesHasta(),
+                    'pendientes_count' => $alumno->totalPagosPendientesHasta(),
+                ];
+            })->values();
+        })
+    );
 
     function renderAlumnos(liga) {
         alumnosContainer.innerHTML = '';
@@ -58,7 +70,10 @@
             div.className = 'form-check';
             div.innerHTML = `
                 <input class="form-check-input alumnoCheck" type="checkbox" name="alumnos[]" value="${a.id}" id="alumno${a.id}">
-                <label class="form-check-label" for="alumno${a.id}">${a.nombre} ${a.apellidos}</label>
+                <label class="form-check-label" for="alumno${a.id}">
+                    ${a.nombre} ${a.apellidos}
+                    ${a.tiene_pagos_pendientes ? `<span class="ms-1 text-warning" title="Tiene ${a.pendientes_count} cuota(s) pendiente(s)">&#9888;</span>` : ''}
+                </label>
             `;
             alumnosContainer.appendChild(div);
         });

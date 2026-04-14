@@ -19,6 +19,10 @@
             <input type="date" name="fecha_nacimiento" class="form-control" value="{{ old('fecha_nacimiento') }}">
         </div>
         <div class="mb-3">
+            <label>Fecha de Alta</label>
+            <input type="date" name="fecha_alta" class="form-control" value="{{ old('fecha_alta', now()->format('Y-m-d')) }}">
+        </div>
+        <div class="mb-3">
             <label>Liga</label>
             <select name="liga" class="form-control">
                 <option value="local">Local</option>

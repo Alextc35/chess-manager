@@ -8,8 +8,11 @@
         @csrf
 
         <div class="mb-3">
-            <label>Email</label>
-            <input type="email" class="form-control" name="email" required>
+            <label>Usuario o email</label>
+            <input type="text" class="form-control" name="login" value="{{ old('login') }}" required>
+            @error('login')
+                <div class="text-danger mt-1">{{ $message }}</div>
+            @enderror
         </div>
 
         <div class="mb-3">

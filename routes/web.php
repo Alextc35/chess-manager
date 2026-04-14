@@ -8,6 +8,7 @@ use App\Http\Controllers\EnfrentamientoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TemporadaAlumnoController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PagoController;
 
 // Dashboard protegido
 Route::get('/', [DashboardController::class, 'index'])
@@ -21,6 +22,10 @@ Route::middleware('auth')->group(function () {
     Route::resource('temporadas', TemporadaController::class);
     Route::resource('clasificacions', ClasificacionController::class);
     Route::resource('enfrentamientos', EnfrentamientoController::class);
+    Route::get('pagos', [PagoController::class, 'index'])->name('pagos.index');
+    Route::post('pagos', [PagoController::class, 'store'])->name('pagos.store');
+    Route::patch('pagos/{pago}', [PagoController::class, 'update'])->name('pagos.update');
+    Route::delete('pagos/{pago}', [PagoController::class, 'destroy'])->name('pagos.destroy');
 
     Route::get('temporadas/{temporada}/alumnos', [TemporadaAlumnoController::class, 'edit'])
         ->name('temporadas.alumnos.edit');

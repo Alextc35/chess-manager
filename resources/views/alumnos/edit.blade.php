@@ -20,7 +20,12 @@
 
         <div class="mb-3">
             <label>Fecha de Nacimiento</label>
-            <input type="date" name="fecha_nacimiento" class="form-control" value="{{ old('fecha_nacimiento', $alumno->fecha_nacimiento) }}">
+            <input type="date" name="fecha_nacimiento" class="form-control" value="{{ old('fecha_nacimiento', optional($alumno->fecha_nacimiento)->format('Y-m-d')) }}">
+        </div>
+
+        <div class="mb-3">
+            <label>Fecha de Alta</label>
+            <input type="date" name="fecha_alta" class="form-control" value="{{ old('fecha_alta', optional($alumno->fecha_alta)->format('Y-m-d')) }}">
         </div>
 
         <div class="mb-3">

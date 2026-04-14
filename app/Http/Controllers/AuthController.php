@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -15,15 +16,23 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
+            'login' => 'required|string',
             'password' => 'required',
         ]);
 
-        if (Auth::attempt($request->only('email', 'password'))) {
+        $credentials = [
+            Str::contains($request->login, '@') ? 'email' : 'name' => $request->login,
+            'password' => $request->password,
+        ];
+
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
             return redirect()->route('dashboard');
         }
 
-        return back()->withErrors(['email' => 'Credenciales incorrectas.']);
+        return back()
+            ->withErrors(['login' => 'Credenciales incorrectas.'])
+            ->onlyInput('login');
     }
 
     public function logout()

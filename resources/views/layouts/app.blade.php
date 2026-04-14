@@ -21,6 +21,7 @@
                     <li class="nav-item"><a class="nav-link" href="{{ route('temporadas.index') }}">Temporadas</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('clasificacions.index') }}">Clasificaciones</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('enfrentamientos.index') }}">Enfrentamientos</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('pagos.index') }}">Pagos</a></li>
                     <li class="nav-item">
                         <form action="{{ route('logout') }}" method="POST" class="d-inline">
                             @csrf

@@ -4,30 +4,36 @@
             <tr>
                 <th>Nombre</th>
                 <th>Apellidos</th>
+                <th>Cuotas</th>
                 <th>Fecha Nacimiento</th>
+                <th>Fecha Alta</th>
                 <th>Liga</th>
-                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
             @forelse($alumnos as $alumno)
             <tr>
-                <td>{{ $alumno->nombre }}</td>
-                <td>{{ $alumno->apellidos }}</td>
-                <td>{{ $alumno->fecha_nacimiento ? $alumno->fecha_nacimiento->format('d/m/Y') : '—' }}</td>
-                <td>{{ $alumno->liga }}</td>
                 <td>
-                    <a href="{{ route('alumnos.edit', $alumno) }}" class="btn btn-warning btn-sm">Editar</a>
-                    <form action="{{ route('alumnos.destroy', $alumno) }}" method="POST" style="display:inline-block;">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Seguro que quieres eliminarlo?')">Eliminar</button>
-                    </form>
+                    <a href="{{ route('alumnos.show', $alumno) }}">{{ $alumno->nombre }}</a>
+                    @if($alumno->tienePagosPendientesHasta())
+                        <span class="ms-1 text-warning" title="Tiene cuotas pendientes">&#9888;</span>
+                    @endif
                 </td>
+                <td>{{ $alumno->apellidos }}</td>
+                <td>
+                    @if($alumno->tienePagosPendientesHasta())
+                        <span class="badge bg-warning text-dark">{{ $alumno->totalPagosPendientesHasta() }} pendiente{{ $alumno->totalPagosPendientesHasta() > 1 ? 's' : '' }}</span>
+                    @else
+                        <span class="badge bg-success">Al día</span>
+                    @endif
+                </td>
+                <td>{{ $alumno->fecha_nacimiento ? $alumno->fecha_nacimiento->format('d/m/Y') : '—' }}</td>
+                <td>{{ $alumno->fecha_alta ? $alumno->fecha_alta->format('d/m/Y') : '—' }}</td>
+                <td>{{ $alumno->liga }}</td>
             </tr>
             @empty
             <tr>
-                <td colspan="5" class="text-center">No se encontraron alumnos.</td>
+                <td colspan="6" class="text-center">No se encontraron alumnos.</td>
             </tr>
             @endforelse
         </tbody>

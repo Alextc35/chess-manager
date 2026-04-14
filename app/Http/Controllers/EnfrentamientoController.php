@@ -36,7 +36,9 @@ class EnfrentamientoController extends Controller
                 ->with('error', 'No hay temporadas activas. Primero crea una temporada para generar enfrentamientos.');
         }
 
-        $alumnos = Alumno::all();
+        $alumnos = Alumno::with(['pagos' => function ($query) {
+            $query->whereDate('mes', '<=', now()->endOfMonth());
+        }])->orderBy('nombre')->get();
         $ligas = ['local', 'infantil'];
 
         return view('enfrentamientos.multiple', compact('alumnos', 'temporadas', 'ligas'));
@@ -181,7 +183,9 @@ class EnfrentamientoController extends Controller
             $bye[] = array_shift($alumnosIds);
         }
 
-        $alumnos = Alumno::whereIn('id', $request->alumnos)->get();
+        $alumnos = Alumno::with(['pagos' => function ($query) {
+            $query->whereDate('mes', '<=', now()->endOfMonth());
+        }])->whereIn('id', $request->alumnos)->get();
 
         return view('enfrentamientos.resultados', [
             'combinaciones' => $combinaciones,

@@ -31,11 +31,19 @@
                     @foreach($combinaciones as $i => $s)
                         <tr>
                             <td>
-                                {{ $alumnos->find($s['alumno1_id'])->nombre }} {{ $alumnos->find($s['alumno1_id'])->apellidos }}
+                                @php $blancas = $alumnos->find($s['alumno1_id']); @endphp
+                                {{ $blancas->nombre }} {{ $blancas->apellidos }}
+                                @if($blancas->tienePagosPendientesHasta())
+                                    <span class="ms-1 text-warning" title="Tiene cuotas pendientes">&#9888;</span>
+                                @endif
                             </td>
                             <td>
                                 @if($s['alumno2_id'])
-                                    {{ $alumnos->find($s['alumno2_id'])->nombre }} {{ $alumnos->find($s['alumno2_id'])->apellidos }}
+                                    @php $negras = $alumnos->find($s['alumno2_id']); @endphp
+                                    {{ $negras->nombre }} {{ $negras->apellidos }}
+                                    @if($negras->tienePagosPendientesHasta())
+                                        <span class="ms-1 text-warning" title="Tiene cuotas pendientes">&#9888;</span>
+                                    @endif
                                 @else
                                     <em>Descansa</em>
                                 @endif

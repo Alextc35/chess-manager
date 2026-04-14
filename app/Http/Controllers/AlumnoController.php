@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Alumno;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class AlumnoController extends Controller
@@ -12,7 +13,9 @@ class AlumnoController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Alumno::query();
+        $query = Alumno::with(['pagos' => function ($query) {
+            $query->whereDate('mes', '<=', now()->endOfMonth());
+        }]);
 
         // Agrupar la búsqueda por nombre o apellidos
         if ($request->has('q') && $request->q != '') {
@@ -54,6 +57,7 @@ class AlumnoController extends Controller
             'nombre' => 'required|string|max:255',
             'apellidos' => 'required|string|max:255',
             'fecha_nacimiento' => 'nullable|date',
+            'fecha_alta' => 'required|date',
             'liga' => 'required|in:local,infantil',
         ]);
 
@@ -68,7 +72,44 @@ class AlumnoController extends Controller
      */
     public function show(Alumno $alumno)
     {
-        return view('alumnos.show', compact('alumno'));
+        $alumno->load(['pagos' => function ($query) {
+            $query->orderBy('mes', 'desc');
+        }]);
+
+        $mesActual = now()->startOfMonth();
+        $mesInicio = $alumno->fechaAltaCobro()->copy()->startOfMonth();
+        $historial = collect();
+
+        while ($mesInicio->lte($mesActual)) {
+            $mes = $mesActual->copy();
+            $pago = $alumno->pagoParaMes($mes);
+
+            $historial->push([
+                'mes' => $mes,
+                'estado' => $alumno->estadoPagoMes($mes),
+                'pago' => $pago,
+                'editable' => $pago !== null,
+            ]);
+
+            $mesActual->subMonth();
+        }
+
+        $page = (int) request()->input('page', 1);
+        $perPage = 6;
+        $items = $historial->slice(($page - 1) * $perPage, $perPage)->values();
+
+        $pagos = new \Illuminate\Pagination\LengthAwarePaginator(
+            $items,
+            $historial->count(),
+            $perPage,
+            $page,
+            [
+                'path' => request()->url(),
+                'query' => request()->query(),
+            ]
+        );
+
+        return view('alumnos.show', compact('alumno', 'pagos'));
     }
 
     /**
@@ -88,6 +129,7 @@ class AlumnoController extends Controller
             'nombre' => 'required|string|max:255',
             'apellidos' => 'required|string|max:255',
             'fecha_nacimiento' => 'nullable|date',
+            'fecha_alta' => 'required|date',
             'liga' => 'required|in:local,infantil',
         ]);
 
