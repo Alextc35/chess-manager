@@ -45,19 +45,7 @@
     const alertaJugadores = document.getElementById('alertaJugadores');
 
     // Datos de alumnos agrupados por liga
-    const alumnosData = @json(
-        $alumnos->groupBy('liga')->map(function ($grupo) {
-            return $grupo->map(function ($alumno) {
-                return [
-                    'id' => $alumno->id,
-                    'nombre' => $alumno->nombre,
-                    'apellidos' => $alumno->apellidos,
-                    'tiene_pagos_pendientes' => $alumno->tienePagosPendientesHasta(),
-                    'pendientes_count' => $alumno->totalPagosPendientesHasta(),
-                ];
-            })->values();
-        })
-    );
+    const alumnosData = @json($alumnos->groupBy('liga'));
 
     function renderAlumnos(liga) {
         alumnosContainer.innerHTML = '';
