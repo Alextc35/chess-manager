@@ -1,8 +1,21 @@
 services:
   app:
-    build: .
-    container_name: chess-manager
+    build:
+      context: .
+    container_name: chess-manager-app
     ports:
-      - "8000:8000"
+      - "8000:80"
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: http://localhost:8000
+      DB_CONNECTION: sqlite
+      DB_DATABASE: /data/chess-manager.sqlite
+      SESSION_DRIVER: database
+      CACHE_STORE: database
+      QUEUE_CONNECTION: database
     volumes:
-      - .:/app
+      - sqlite_data:/data
+
+volumes:
+  sqlite_data:
