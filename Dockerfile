@@ -3,7 +3,8 @@ FROM composer:2 AS composer
 WORKDIR /app
 
 COPY . .
-RUN composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader --no-scripts \
+RUN rm -f bootstrap/cache/*.php \
+    && composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader --no-scripts \
     && php artisan package:discover --ansi
 
 FROM node:22-alpine AS frontend
@@ -23,8 +24,12 @@ FROM php:8.3-apache
 WORKDIR /var/www/html
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends libzip-dev unzip sqlite3 \
-    && docker-php-ext-install pdo pdo_sqlite \
+    && apt-get install -y --no-install-recommends \
+        libzip-dev \
+        unzip \
+        libsqlite3-dev \
+        sqlite3 \
+    && docker-php-ext-install pdo_sqlite \
     && a2enmod rewrite \
     && rm -rf /var/lib/apt/lists/*
 
@@ -32,7 +37,7 @@ COPY --from=composer /app /var/www/html
 COPY --from=frontend /app/public/build /var/www/html/public/build
 
 RUN cp .env.example .env \
-    && mkdir -p /data \
+    && mkdir -p /data storage/framework/{views,cache,sessions} bootstrap/cache \
     && chown -R www-data:www-data /var/www/html /data \
     && chmod -R ug+rwx storage bootstrap/cache
 

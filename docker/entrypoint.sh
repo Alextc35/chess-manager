@@ -1,4 +1,8 @@
 #!/bin/sh
+mkdir -p storage/framework/views storage/framework/cache storage/framework/sessions bootstrap/cache
+chown -R www-data:www-data /var/www/html /data
+chmod -R ug+rwx storage bootstrap/cache
+
 set -e
 
 if [ ! -f /var/www/html/.env ]; then
