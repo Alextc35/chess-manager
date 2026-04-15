@@ -36,16 +36,28 @@
         </div>
     </form>
 
+    @php $estadoSeleccionado = request('estado'); @endphp
     <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="alert alert-success mb-0">Pagados: <strong>{{ $resumen['pagado'] }}</strong></div>
-        </div>
-        <div class="col-md-4">
-            <div class="alert alert-warning mb-0">Pendientes: <strong>{{ $resumen['pendiente'] }}</strong></div>
-        </div>
-        <div class="col-md-4">
-            <div class="alert alert-secondary mb-0">Exentos: <strong>{{ $resumen['exento'] }}</strong></div>
-        </div>
+        @if(!$estadoSeleccionado || $estadoSeleccionado === 'pagado')
+            <div class="{{ $estadoSeleccionado ? 'col-md-12' : 'col-md-4' }}">
+                <div class="alert alert-success mb-0">Pagados: <strong>{{ $resumen['pagado'] }}</strong></div>
+            </div>
+        @endif
+        @if(!$estadoSeleccionado || $estadoSeleccionado === 'pendiente')
+            <div class="{{ $estadoSeleccionado ? 'col-md-12' : 'col-md-4' }}">
+                <div class="alert alert-warning mb-0">Pendientes: <strong>{{ $resumen['pendiente'] }}</strong></div>
+            </div>
+        @endif
+        @if(!$estadoSeleccionado || $estadoSeleccionado === 'exento')
+            <div class="{{ $estadoSeleccionado ? 'col-md-12' : 'col-md-4' }}">
+                <div class="alert alert-secondary mb-0">Exentos: <strong>{{ $resumen['exento'] }}</strong></div>
+            </div>
+        @endif
+        @if($estadoSeleccionado === 'ausencia')
+            <div class="col-md-12">
+                <div class="alert alert-dark mb-0">Ausencias: <strong>{{ $resumen['ausencia'] }}</strong></div>
+            </div>
+        @endif
     </div>
 
     @if($alumnos->isEmpty())

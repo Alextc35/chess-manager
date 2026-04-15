@@ -61,6 +61,21 @@ class PagoController extends Controller
             })->values();
         }
 
+        $resumen = [
+            'pagado' => 0,
+            'pendiente' => 0,
+            'exento' => 0,
+            'ausencia' => 0,
+        ];
+
+        foreach ($alumnos as $alumno) {
+            $estado = $alumno->estadoPagoMes($mesSeleccionado);
+
+            if (isset($resumen[$estado])) {
+                $resumen[$estado]++;
+            }
+        }
+
         $page = (int) $request->input('page', 1);
         $perPage = 15;
         $total = $alumnos->count();
@@ -76,21 +91,6 @@ class PagoController extends Controller
                 'query' => $request->query(),
             ]
         );
-
-        $resumen = [
-            'pagado' => 0,
-            'pendiente' => 0,
-            'exento' => 0,
-            'ausencia' => 0,
-        ];
-
-        foreach ($alumnos as $alumno) {
-            $estado = $alumno->estadoPagoMes($mesSeleccionado);
-
-            if (isset($resumen[$estado])) {
-                $resumen[$estado]++;
-            }
-        }
 
         return view('pagos.index', compact('alumnos', 'mesSeleccionado', 'resumen'));
     }
