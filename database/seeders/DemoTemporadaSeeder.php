@@ -14,50 +14,43 @@ class DemoTemporadaSeeder extends Seeder
 {
     public function run(): void
     {
-        $temporada = Temporada::updateOrCreate(
-            ['nombre' => 'Enero-Abril 2026'],
-            [
-                'fecha_inicio' => '2026-01-01',
-                'fecha_fin' => '2026-04-30',
-            ]
-        );
+        $locales = Alumno::query()->where('liga', 'local')->orderBy('fecha_alta')->orderBy('apellidos')->orderBy('nombre')->get();
+        $infantiles = Alumno::query()->where('liga', 'infantil')->orderBy('fecha_alta')->orderBy('apellidos')->orderBy('nombre')->get();
 
-        $alumnosLocal = Alumno::query()
-            ->where('liga', 'local')
-            ->whereDate('fecha_alta', '<=', '2026-01-31')
-            ->orderBy('fecha_alta')
-            ->orderBy('apellidos')
-            ->orderBy('nombre')
-            ->take(8)
-            ->get();
+        $temporadas = [
+            ['nombre' => 'ENERO-ABRIL 2024', 'inicio' => '2024-01-01', 'fin' => '2024-04-30', 'rondas' => null],
+            ['nombre' => 'ABRIL-JUNIO 2024', 'inicio' => '2024-05-01', 'fin' => '2024-06-30', 'rondas' => null],
+            ['nombre' => 'SEPTIEMBRE-ENERO 2025', 'inicio' => '2024-09-01', 'fin' => '2025-01-31', 'rondas' => null],
+            ['nombre' => 'ENERO-ABRIL 2025', 'inicio' => '2025-02-01', 'fin' => '2025-04-30', 'rondas' => null],
+            ['nombre' => 'ABRIL-JUNIO 2025', 'inicio' => '2025-05-01', 'fin' => '2025-06-30', 'rondas' => null],
+            ['nombre' => 'SEPTIEMBRE-ENERO 2026', 'inicio' => '2025-09-01', 'fin' => '2026-01-31', 'rondas' => null],
+            ['nombre' => 'ENERO-ABRIL 2026', 'inicio' => '2026-02-01', 'fin' => '2026-03-31', 'rondas' => null],
+            ['nombre' => 'ABRIL-JUNIO 2026', 'inicio' => '2026-04-01', 'fin' => '2026-06-30', 'rondas' => 4],
+        ];
 
-        $alumnosInfantil = Alumno::query()
-            ->where('liga', 'infantil')
-            ->whereDate('fecha_alta', '<=', '2026-01-31')
-            ->orderBy('fecha_alta')
-            ->orderBy('apellidos')
-            ->orderBy('nombre')
-            ->take(8)
-            ->get();
+        foreach ($temporadas as $config) {
+            $temporada = Temporada::create([
+                'nombre' => $config['nombre'],
+                'fecha_inicio' => $config['inicio'],
+                'fecha_fin' => $config['fin'],
+            ]);
 
-        $alumnosTemporada = $alumnosLocal
-            ->concat($alumnosInfantil)
-            ->pluck('id')
-            ->all();
+            $fechaFin = Carbon::parse($config['fin']);
+            $activosLocal = $locales->filter(fn (Alumno $alumno) => $alumno->fechaAltaCobro()->lte($fechaFin))->values();
+            $activosInfantil = $infantiles->filter(fn (Alumno $alumno) => $alumno->fechaAltaCobro()->lte($fechaFin))->values();
 
-        $temporada->alumnos()->sync($alumnosTemporada);
-        $temporada->enfrentamientos()->delete();
-        $temporada->clasificacions()->delete();
-        Pago::query()->whereIn('alumno_id', $alumnosTemporada)->delete();
+            $temporada->alumnos()->sync($activosLocal->concat($activosInfantil)->pluck('id')->all());
 
-        $this->crearEnfrentamientosLiga($temporada, 'local', $alumnosLocal, Carbon::parse('2026-01-10'));
-        $this->crearEnfrentamientosLiga($temporada, 'infantil', $alumnosInfantil, Carbon::parse('2026-01-11'));
-        $this->crearPagosDemo($alumnosLocal, $alumnosInfantil);
+            $this->crearEnfrentamientosLiga($temporada, 'local', $activosLocal, Carbon::parse($config['inicio'])->next(Carbon::SATURDAY), $config['rondas']);
+            $this->crearEnfrentamientosLiga($temporada, 'infantil', $activosInfantil, Carbon::parse($config['inicio'])->next(Carbon::SUNDAY), $config['rondas']);
 
-        $this->recalcularClasificacion($temporada);
+            $this->recalcularClasificacion($temporada, $activosLocal, $activosInfantil);
+        }
+
+        $this->crearPagosDemo($locales->concat($infantiles)->values());
     }
 
-    private function crearEnfrentamientosLiga(Temporada $temporada, string $liga, $alumnos, Carbon $fechaInicio): void
+    private function crearEnfrentamientosLiga(Temporada $temporada, string $liga, $alumnos, Carbon $fechaInicio, ?int $limiteRondas = null): void
     {
         $ids = $alumnos->pluck('id')->values()->all();
 
@@ -66,7 +59,12 @@ class DemoTemporadaSeeder extends Seeder
         }
 
         $rondas = $this->generarRondas($ids);
-        $resultados = ['blancas', 'negras', 'tablas', 'blancas', 'tablas', 'negras'];
+
+        if ($limiteRondas !== null) {
+            $rondas = array_slice($rondas, 0, $limiteRondas);
+        }
+
+        $resultados = ['blancas', 'negras', 'tablas', 'blancas', 'negras', 'tablas'];
 
         foreach ($rondas as $indiceRonda => $ronda) {
             $fechaRonda = $fechaInicio->copy()->addWeeks($indiceRonda);
@@ -77,8 +75,8 @@ class DemoTemporadaSeeder extends Seeder
                     'liga' => $liga,
                     'alumno1_id' => $alumno1Id,
                     'alumno2_id' => $alumno2Id,
-                    'resultado' => $resultados[($indiceRonda + $indiceMesa) % count($resultados)],
-                    'fecha' => $fechaRonda->copy()->addMinutes($indiceMesa * 15),
+                    'resultado' => $resultados[($indiceRonda + $indiceMesa + $temporada->id) % count($resultados)],
+                    'fecha' => $fechaRonda->copy()->addMinutes($indiceMesa * 20),
                 ]);
             }
         }
@@ -99,13 +97,13 @@ class DemoTemporadaSeeder extends Seeder
             $parejas = [];
 
             for ($i = 0; $i < $total / 2; $i++) {
-                $local = $jugadores[$i];
-                $visitante = $jugadores[$total - 1 - $i];
+                $a = $jugadores[$i];
+                $b = $jugadores[$total - 1 - $i];
 
-                if ($local !== null && $visitante !== null) {
+                if ($a !== null && $b !== null) {
                     $parejas[] = $ronda % 2 === 0
-                        ? [$local, $visitante]
-                        : [$visitante, $local];
+                        ? [$a, $b]
+                        : [$b, $a];
                 }
             }
 
@@ -120,9 +118,28 @@ class DemoTemporadaSeeder extends Seeder
         return $rondas;
     }
 
-    private function recalcularClasificacion(Temporada $temporada): void
+    private function recalcularClasificacion(Temporada $temporada, $activosLocal, $activosInfantil): void
     {
-        $puntos = $temporada->fresh('enfrentamientos')->calcularClasificacion();
+        $puntos = [];
+
+        foreach ($activosLocal->concat($activosInfantil) as $alumno) {
+            $puntos[$alumno->id] = 0;
+        }
+
+        foreach ($temporada->enfrentamientos as $enfrentamiento) {
+            if ($enfrentamiento->resultado === 'blancas') {
+                $puntos[$enfrentamiento->alumno1_id] += 3;
+                $puntos[$enfrentamiento->alumno2_id] += 1;
+            } elseif ($enfrentamiento->resultado === 'negras') {
+                $puntos[$enfrentamiento->alumno1_id] += 1;
+                $puntos[$enfrentamiento->alumno2_id] += 3;
+            } elseif ($enfrentamiento->resultado === 'tablas') {
+                $puntos[$enfrentamiento->alumno1_id] += 2;
+                $puntos[$enfrentamiento->alumno2_id] += 2;
+            }
+        }
+
+        arsort($puntos);
         $posicion = 1;
 
         foreach ($puntos as $alumnoId => $puntuacion) {
@@ -135,65 +152,49 @@ class DemoTemporadaSeeder extends Seeder
         }
     }
 
-    private function crearPagosDemo($alumnosLocal, $alumnosInfantil): void
+    private function crearPagosDemo($alumnos): void
     {
-        $patrones = [
-            ['pagado', 'pagado', 'pagado', 'pagado'],
-            ['pagado', 'pagado', 'pagado', 'pendiente'],
-            ['pagado', 'ausencia', 'pagado', 'pagado'],
-            ['pagado', 'pagado', 'ausencia', 'ausencia'],
-            ['pagado', 'pagado', 'pagado', 'pendiente'],
-            ['pagado', 'exento', 'pagado', 'pagado'],
-            ['pagado', 'pagado', 'ausencia', 'pagado'],
-            ['pagado', 'pagado', 'pagado', 'pagado'],
-        ];
+        $inicioBase = Carbon::parse('2024-04-01');
+        $mesActual = Carbon::parse('2026-04-01');
 
-        $alumnos = $alumnosLocal->concat($alumnosInfantil)->values();
+        foreach ($alumnos->values() as $indice => $alumno) {
+            $cursor = $alumno->fechaAltaCobro()->copy()->startOfMonth();
 
-        foreach ($alumnos as $indice => $alumno) {
-            $patron = $patrones[$indice % count($patrones)];
-            $this->registrarPagosAlumno($alumno, $patron);
+            if ($cursor->lt($inicioBase)) {
+                $cursor = $inicioBase->copy();
+            }
+
+            while ($cursor->lte($mesActual)) {
+                $estado = $this->estadoPagoDemo($alumno, $indice, $cursor, $mesActual);
+
+                Pago::create([
+                    'alumno_id' => $alumno->id,
+                    'mes' => $cursor->toDateString(),
+                    'estado' => $estado,
+                    'fecha_pago' => $estado === 'pagado'
+                        ? $cursor->copy()->day(min(5 + (($alumno->id + $indice) % 6), $cursor->daysInMonth))->toDateString()
+                        : null,
+                    'importe' => $estado === 'pagado' ? 15 : null,
+                    'observaciones' => $estado === 'ausencia' ? 'No asistió este mes.' : null,
+                ]);
+
+                $cursor->addMonth();
+            }
         }
     }
 
-    private function registrarPagosAlumno(Alumno $alumno, array $patron): void
+    private function estadoPagoDemo(Alumno $alumno, int $indice, Carbon $mes, Carbon $mesActual): string
     {
-        $meses = [
-            Carbon::parse('2026-01-01'),
-            Carbon::parse('2026-02-01'),
-            Carbon::parse('2026-03-01'),
-            Carbon::parse('2026-04-01'),
-        ];
-
-        foreach ($meses as $indice => $mes) {
-            if ($mes->lt($alumno->fechaAltaCobro()->copy()->startOfMonth())) {
-                continue;
-            }
-
-            $estado = $patron[$indice] ?? 'pendiente';
-            $datos = [
-                'alumno_id' => $alumno->id,
-                'mes' => $mes->toDateString(),
-                'estado' => $estado,
-                'fecha_pago' => null,
-                'importe' => null,
-                'observaciones' => null,
-            ];
-
-            if ($estado === 'pagado') {
-                $datos['fecha_pago'] = $mes->copy()->day(min(5 + ($alumno->id % 6), $mes->daysInMonth))->toDateString();
-                $datos['importe'] = 15;
-            }
-
-            if ($estado === 'ausencia') {
-                $datos['observaciones'] = 'Ausencia registrada en la demo';
-            }
-
-            if ($estado === 'exento') {
-                $datos['observaciones'] = 'Mes exento en la demo';
-            }
-
-            Pago::create($datos);
+        if ($mes->equalTo($mesActual)) {
+            return (($indice + $alumno->id) % 5 === 0) ? 'pendiente' : 'pagado';
         }
+
+        $hash = crc32($alumno->id . '-' . $mes->format('Y-m'));
+
+        if ($hash % 11 === 0) {
+            return 'ausencia';
+        }
+
+        return 'pagado';
     }
 }
