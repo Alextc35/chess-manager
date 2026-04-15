@@ -31,7 +31,7 @@ class AlumnoController extends Controller
             $query->where('liga', $request->liga);
         }
 
-        $alumnos = $query->orderBy('nombre')->paginate(5)->withQueryString();
+        $alumnos = $query->orderBy('nombre')->paginate(12)->withQueryString();
 
         if ($request->ajax()) {
             return view('alumnos.partials.tabla', compact('alumnos'))->render();
